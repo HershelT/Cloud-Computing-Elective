@@ -78,6 +78,53 @@ def get_stock(id):
         return jsonify({"server error" : str(e)}), 500
     return jsonify(stock), 200
 
+#DELETE /stocks/<id>
+@app.route('/stocks/<int:id>', methods=['DELETE'])
+def delete_stock(id):
+    print("Deleting stock with id: ", id)
+    try:
+        del Stocks[int(id)]
+        return '', 204
+    except KeyError:
+        print("DELETE request error: no such ID")
+        return jsonify({"error" : "Not found"}), 404
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    
+#PUT /stocks/<id>
+@app.route('/stocks/<int:id>', methods=['PUT'])
+def update(id):
+    print("Updating stock with id: ", id)
+    try:
+        content_type = request.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return jsonify({"error" : "Expected application/json media type"}), 415
+        stock_data = request.get_json()
+        #check if ALL fields are provided
+        required_fields = ['id', 'name', 'symbol', 'purchase price', 'purchase date', 'shares']
+        if not all(field in stock_data for field in required_fields):
+            return jsonify({"error:" : "Malformed data"}), 400
+        #Check if the stock exists
+        stock = Stocks[int(id)]
+        #Update the stock
+        stock = {
+            "id": str(id),
+            "name": stock_data['name'],
+            "symbol": stock_data['symbol'].upper(),
+            "purchase price": round(float(stock_data['purchase price']), 2),
+            "purchase date": stock_data['purchase date'],
+            "shares": int(stock_data['shares']),
+        }
+        Stocks[id] = stock
+    except KeyError:
+        print("PUT request error: no such ID")
+        return jsonify({"error" : "Not found"}), 404
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({"id" : id}), 200
+
 #GET stock-value/<id>
 @app.route('/stock-value/<int:id>', methods=['GET'])
 def get_stock_value(id):
