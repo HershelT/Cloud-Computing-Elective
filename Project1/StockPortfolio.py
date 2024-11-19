@@ -3,6 +3,9 @@ import json
 import requests
 from datetime import datetime
 
+from APIKEY import KEY
+
+
 app = Flask(__name__) #initialize the app
 Stocks = {}
 
@@ -80,11 +83,33 @@ def get_stock(id):
 
 
 #GET stock-value/<id>
-# @app.route('/stock-value/<int:id>', methods=['GET'])
-# def get_stock_value(id):
-#     print("Getting stock value with id: ", id)
-#     try:
-#         stock = Stocks[int(id)]
+@app.route('/stock-value/<int:id>', methods=['GET'])
+def get_stock_value(id):
+    print("Getting stock value with id: ", id)
+    try:
+        stock = Stocks[int(id)]
+        #Get the stock symbol
+        symbol = stock['symbol']
+        #Get the stock purchase price
+        api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
+        response = requests.get(api_url, headers={'X-Api-Key': KEY})
+        #Get the current stock price from response
+        current_price = response.json()['price']
+        #Calculate the stock value times how many shares
+        stock_value = round(float(current_price * stock['shares']), 2)
+        #return a json with the stock value
+    except KeyError:
+        print("GET request error: no such ID")
+        return jsonify({"error" : "Stock not found"}), 404
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({
+            "symbol": symbol,
+            "ticker": current_price,
+            "stock value": stock_value
+        }), 200
+
 
 
 
