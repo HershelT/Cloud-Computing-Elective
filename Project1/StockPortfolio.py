@@ -20,7 +20,9 @@ def generate_id():
 def create_stock():
     print("Creating a new stock")
     try:
-        global Stocks
+        content_type = request.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return jsonify({"error" : "Expected application/json media type"}), 415
         #Grab the stock from the request
         stock_data = request.json
         #check Required fields
@@ -175,7 +177,7 @@ def get_portfolio_value():
                 print("GET request error: ", response.status_code)
                 return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
             #Get the current stock price from response
-            current_price = response.json()['price']
+            current_price = int(response.json()['price'])
             #Calculate the stock value times how many shares
             stock_value = current_price * stock['shares']
             #Add the stock value to the total value

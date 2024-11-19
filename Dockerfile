@@ -20,4 +20,4 @@ EXPOSE 8001
 ENV FLASK_APP=StockPortfolio.py
 
 # Run the application
-CMD ["flask", "run", "--host=0.0.0.0", "--port=8001"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=8001", "--debug"]
