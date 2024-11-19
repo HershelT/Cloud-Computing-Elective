@@ -72,15 +72,11 @@ def get_stock(id):
         stock = Stocks[int(id)]
     except KeyError:
         print("GET request error: no such ID")
-        return jsonify({"error" : "Stock not found"}), 404
+        return jsonify({"error" : "Not found"}), 404
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
     return jsonify(stock), 200
-
-#Use API to get current stock value
-
-
 
 #GET stock-value/<id>
 @app.route('/stock-value/<int:id>', methods=['GET'])
@@ -93,14 +89,19 @@ def get_stock_value(id):
         #Get the stock purchase price
         api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
         response = requests.get(api_url, headers={'X-Api-Key': KEY})
+        #Check if the response is valid
+        if not response.status_code == requests.codes.ok:
+            print("GET request error: ", response.status_code)
+            return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
         #Get the current stock price from response
         current_price = response.json()['price']
         #Calculate the stock value times how many shares
         stock_value = round(float(current_price * stock['shares']), 2)
         #return a json with the stock value
+    
     except KeyError:
         print("GET request error: no such ID")
-        return jsonify({"error" : "Stock not found"}), 404
+        return jsonify({"error" : "Not found"}), 404
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
@@ -109,6 +110,37 @@ def get_stock_value(id):
             "ticker": current_price,
             "stock value": stock_value
         }), 200
+
+#GET /portfolio-value
+@app.route('/portfolio-value', methods=['GET'])
+def get_portfolio_value():
+    print("Getting portfolio value")
+    try:
+        total_value = 0
+        for stock in Stocks.values():
+            #Get the stock symbol
+            symbol = stock['symbol']
+            #Get the stock purchase price
+            api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
+            response = requests.get(api_url, headers={'X-Api-Key': KEY})
+            #Check if the response is valid
+            if not response.status_code == requests.codes.ok:
+                print("GET request error: ", response.status_code)
+                return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
+            #Get the current stock price from response
+            current_price = response.json()['price']
+            #Calculate the stock value times how many shares
+            stock_value = current_price * stock['shares']
+            #Add the stock value to the total value
+            total_value += stock_value
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({
+        # REturn date in Day mont year format
+        "date" : datetime.now().strftime("%d %B %Y"),
+        "portfolio value": round(float(total_value), 2)
+    }), 200
 
 
 
