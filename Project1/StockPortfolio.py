@@ -177,23 +177,19 @@ def get_portfolio_value():
                 print("GET request error: ", response.status_code)
                 return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
             #Get the current stock price from response
-            current_price = int(response.json()['price'])
+            current_price = response.json()['price']
             #Calculate the stock value times how many shares
-            stock_value = current_price * stock['shares']
+            stock_value = int(current_price) * int(stock['shares'])
             #Add the stock value to the total value
             total_value += stock_value
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
     return jsonify({
-        # REturn date in Day mont year format
-        "date" : datetime.now().strftime("%d %B %Y"),
+        # REturn date in Day mont year format (DD-MM-YYYY)
+        "date" : datetime.now().strftime("%d-%m-%Y"),
         "portfolio value": round(float(total_value), 2)
     }), 200
-
-
-
-
 
 
 
