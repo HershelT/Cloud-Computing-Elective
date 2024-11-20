@@ -5,6 +5,8 @@ from datetime import datetime
 
 from APIKEY import KEY
 
+import os
+# KEY = os.environ.get('NINJA_API_KEY')
 
 app = Flask(__name__) #initialize the app
 Stocks = {}
@@ -197,8 +199,9 @@ def get_portfolio_value():
 
 #Starting the service
 if __name__ == '__main__':
-    print("Starting the Stock Portfolio Service")
-    app.run(host='0.0.0.0', port=8001, debug=True)
+    port = int(os.getenv('PORT', 5001))
+    print(f"Starting the Stock Portfolio Service on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 
 
