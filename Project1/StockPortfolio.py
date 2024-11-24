@@ -11,6 +11,9 @@ import os
 app = Flask(__name__) #initialize the app
 Stocks = {}
 
+#Stores Stock Symbols
+Symbols = {}
+
 id = 0
 def generate_id():
     global id
@@ -31,6 +34,10 @@ def create_stock():
         required_fields = ['purchase price', 'symbol', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
+        #Check if the stock symbol is already provided
+        if stock_data['symbol'].upper() in Symbols:
+            print("POST request error: symbol already exists")
+            return jsonify({"error" : "Malformed data"}), 400
         new_id = generate_id()
         #Check if the stock name is already provided
         if 'name' not in stock_data:
@@ -87,6 +94,7 @@ def get_stock(id):
 def delete_stock(id):
     print("Deleting stock with id: ", id)
     try:
+        Symbols.pop(Stocks[int(id)]['symbol'])
         del Stocks[int(id)]
         return '', 204
     except KeyError:
