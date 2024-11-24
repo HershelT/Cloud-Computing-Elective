@@ -38,6 +38,9 @@ def create_stock():
         if stock_data['symbol'].upper() in Symbols:
             print("POST request error: symbol already exists")
             return jsonify({"error" : "Malformed data"}), 400
+        #Add the symbol to the global dictionary
+        Symbols[stock_data['symbol'].upper()] = True
+        #Generate a new ID
         new_id = generate_id()
         #Check if the stock name is already provided
         if 'name' not in stock_data:
