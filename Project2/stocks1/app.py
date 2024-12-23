@@ -26,7 +26,7 @@ def create_stock():
         #Grab the stock from the request
         stock_data = request.json
         #check Required fields
-        required_fields = ['purchase price', 'symbol', 'shares']
+        required_fields = ['purchase_price', 'symbol', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
         #Check if the stock symbol is already provided
@@ -38,21 +38,21 @@ def create_stock():
             name = "NA"
         else:
             name = stock_data['name']
-        #Check if purchase date is provided
-        if 'purchase date' not in stock_data:
+        #Check if purchase_date is provided
+        if 'purchase_date' not in stock_data:
             purchase_date = "NA"
         else:
-            purchase_date = stock_data['purchase date']
+            purchase_date = stock_data['purchase_date']
         stock = {
             "name": name,
             "symbol": stock_data['symbol'].upper(),
-            "purchase price": round(float(stock_data['purchase price']), 2),
-            "purchase date": purchase_date,
+            "purchase_price": round(float(stock_data['purchase_price']), 2),
+            "purchase_date": purchase_date,
             "shares": int(stock_data['shares']),
         }
         #Add stock to global dictionary
         result = collection.insert_one(stock)
-        response_data = {"id" : str(result.inserted_id)}
+        response_data = {"_id" : str(result.inserted_id)}
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
@@ -111,15 +111,15 @@ def update(stock_id):
             return jsonify({"error" : "Expected application/json media type"}), 415
         stock_data = request.get_json()
         #check if ALL fields are provided
-        required_fields = ['name', 'symbol', 'purchase price', 'purchase date', 'shares']
+        required_fields = ['name', 'symbol', 'purchase_price', 'purchase_date', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
         #Check if the stock exists
         result = collection.update_one({"_id":stock_id}, { "$set": {
             "name": stock_data['name'],
             "symbol": stock_data['symbol'].upper(),
-            "purchase price": round(float(stock_data['purchase price']), 2),
-            "purchase date": stock_data['purchase date'],
+            "purchase_price": round(float(stock_data['purchase_price']), 2),
+            "purchase_date": stock_data['purchase_date'],
             "shares": int(stock_data['shares']),
         }})
         if result.matched_count == 0:
@@ -128,7 +128,7 @@ def update(stock_id):
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-    return jsonify({"id" : stock_id}), 200
+    return jsonify({"_id" : stock_id}), 200
 
 #GET stock-value/<id>
 @app.route('/stock-value/<stock_id>', methods=['GET'])
@@ -141,7 +141,7 @@ def get_stock_value(stock_id):
             return jsonify({"error" : "Not found"}), 404
         #Get the stock symbol
         symbol = stock['symbol']
-        #Get the stock purchase price
+        #Get the stock purchase_price
         api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
         response = requests.get(api_url, headers={'X-Api-Key': KEY})
         #Check if the response is valid
@@ -172,7 +172,7 @@ def get_portfolio_value():
         for stock in collection.find():
             #Get the stock symbol
             symbol = stock['symbol']
-            #Get the stock purchase price
+            #Get the stock purchase_price
             api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
             response = requests.get(api_url, headers={'X-Api-Key': KEY})
             #Check if the response is valid
@@ -200,6 +200,6 @@ def kill_container():
 
 #Starting the service
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5001))
+    port = int(os.getenv('PORT', 8000))
     print(f"Starting the Stock Portfolio Service on port {port}")
     app.run(host='0.0.0.0', port=port, debug=True)

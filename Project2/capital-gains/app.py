@@ -7,7 +7,8 @@ app = Flask(__name__)
 def get_total_gain(stocks):
     total_gain = 0
     for stock in stocks:
-      stock_value_url = f'http://{stock["_id"].split("-")[0]}:8000/stock-value/{stock["_id"]}'
+      stock_value_url = 'http://stocks1:8000/stock-value/{}'.format(stock['_id'])
+
       try:
         stock_value = requests.get(stock_value_url).json()
         current_value = float(stock_value['stock value'])
@@ -38,7 +39,7 @@ def filter_stocks(stocks, filters):
 def capital_gains():
     filters = request.args.to_dict()
 
-    stocks1_url = 'http://stocks1-a:8000/stocks'
+    stocks1_url = 'http://stocks1:8000/stocks'
     stocks2_url = 'http://stocks2:8000/stocks'
 
     try:
