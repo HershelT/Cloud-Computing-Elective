@@ -1,0 +1,59 @@
+version: '3'
+services: 
+  mongodb:
+    image: mongo
+    ports: 
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+  stocks1-a:
+    build: ./stocks1-a
+    ports: 
+      - "5001:5000"
+    expose:
+      - "8000"
+    environment:
+      - COLLECTION_NAME=stocks1
+    depends_on:
+      - mongodb
+    restart: always
+  stocks1-b:
+    build: ./stocks1
+    ports: 
+      - "5004:5000"
+    expose:
+      - "8000"
+    environment:
+      - COLLECTION_NAME=stocks1
+    depends_on:
+      - mongodb
+    restart: always
+  stocks2:
+    build: ./stocks2
+    ports: 
+      - "5002:5000"
+    expose:
+      - "8000"
+    depends_on:
+      - mongodb
+    restart: always
+  capital-gains:
+    build: ./capital-gains
+    ports: 
+      - "5003:5000"
+    expose:
+      - "8000"
+    depends_on:
+      - stocks1-a
+      - stocks1-b
+      - stocks2
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - stocks1-a
+      - stocks1-b
+      - stocks2
