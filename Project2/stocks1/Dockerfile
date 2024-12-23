@@ -9,5 +9,5 @@ RUN pip install -r requirements.txt
 COPY . .
 
 ENV COLLECTION_NAME=stocks1
-ENV PORT=8000
+# ENV PORT=8000
 CMD ["python", "app.py"]
