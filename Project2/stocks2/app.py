@@ -64,14 +64,23 @@ def create_stock():
 def get_stocks():
     print("Getting all stocks")
     try:
-        stocks = list(collection.find())
-        for stock in stocks:
-             stock['_id'] = str(stock['_id'])
-        return jsonify(stocks), 200
+      filters = request.args.to_dict()
+      filtered_stocks = []
+      for stock in collection.find():
+        match = True
+        if 'portfolio' in filters:
+            match = match and stock['_id'].startswith(filters['portfolio'])
+        if 'numsharesgt' in filters:
+            match = match and float(stock['shares']) > float(filters['numsharesgt'])
+        if 'numshareslt' in filters:
+            match = match and float(stock['shares']) < float(filters['numshareslt'])
+        if match:
+          stock['_id'] = str(stock['_id'])
+          filtered_stocks.append(stock)
+      return jsonify(filtered_stocks), 200
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-
 #GET /stocks/<id>
 @app.route('/stocks/<stock_id>', methods=['GET'])
 def get_stock(stock_id):
