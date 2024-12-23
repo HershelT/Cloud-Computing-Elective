@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import requests
 from datetime import datetime
 
-from Project2.stocks2.APIKEY import KEY
+from APIKEY import KEY
 
 import os
 
@@ -16,8 +16,8 @@ collection_name = os.getenv('COLLECTION_NAME','stocks2') # Can be 'stocks1' or '
 collection = db[collection_name] #Create or use an existing collection
 
 
-# POST /stocks
-@app.route('/stocks', methods=['POST'])
+# POST /stocks2
+@app.route('/stocks2', methods=['POST'])
 def create_stock():
     print("Creating a new stock")
     try:
@@ -59,8 +59,8 @@ def create_stock():
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
 
-# GET /stocks
-@app.route('/stocks', methods=['GET'])
+# GET /stocks2
+@app.route('/stocks2', methods=['GET'])
 def get_stocks():
     print("Getting all stocks")
     try:
@@ -81,8 +81,8 @@ def get_stocks():
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-#GET /stocks/<id>
-@app.route('/stocks/<stock_id>', methods=['GET'])
+#GET /stocks2/<id>
+@app.route('/stocks2/<stock_id>', methods=['GET'])
 def get_stock(stock_id):
     print("Getting stock with id: ", stock_id)
     try:
@@ -97,8 +97,8 @@ def get_stock(stock_id):
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
 
-#DELETE /stocks/<id>
-@app.route('/stocks/<stock_id>', methods=['DELETE'])
+#DELETE /stocks2/<id>
+@app.route('/stocks2/<stock_id>', methods=['DELETE'])
 def delete_stock(stock_id):
     print("Deleting stock with id: ", stock_id)
     try:
@@ -111,8 +111,8 @@ def delete_stock(stock_id):
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
     
-#PUT /stocks/<id>
-@app.route('/stocks/<stock_id>', methods=['PUT'])
+#PUT /stocks2/<id>
+@app.route('/stocks2/<stock_id>', methods=['PUT'])
 def update(stock_id):
     print("Updating stock with id: ", stock_id)
     try:

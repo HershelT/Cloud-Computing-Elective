@@ -8,7 +8,7 @@ services:
   stocks1-a:
     build: ./stocks1
     ports: 
-      - "5001:5000"
+      - "5001:8000"
     expose:
       - "8000"
     environment:
@@ -19,7 +19,7 @@ services:
   stocks1-b:
     build: ./stocks1
     ports: 
-      - "5004:5000"
+      - "5004:8000"
     expose:
       - "8000"
     environment:
@@ -30,7 +30,7 @@ services:
   stocks2:
     build: ./stocks2
     ports: 
-      - "5002:5000"
+      - "5002:8000"
     expose:
       - "8000"
     depends_on:
@@ -39,9 +39,9 @@ services:
   capital-gains:
     build: ./capital-gains
     ports: 
-      - "5003:5000"
+      - "5003:8080"
     expose:
-      - "8000"
+      - "8080"
     depends_on:
       - stocks1-a
       - stocks1-b
