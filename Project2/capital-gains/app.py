@@ -7,7 +7,7 @@ def get_total_gain(stocks):
     total_gain = 0
     for stock in stocks:
         current_value = float(stock['stock value'])
-        purchase_price = float(stock['purchase_price'])
+        purchase_price = float(stock['purchase price'])
         gain = current_value - purchase_price
         total_gain += gain
     return total_gain

@@ -8,10 +8,10 @@ class TestStocks1Service(unittest.TestCase):
     def test_create_stock(self):
         """Test creating a new stock"""
         stock_data = {
-            "name": "Test Stock",
-            "symbol": "TST",
-            "purchase_price": 100.0,
-            "purchase_date": "2023-01-01",
+            "name": "Google",
+            "symbol": "GOOG",
+            "purchase price": 100.0,
+            "purchase date": "2023-01-01",
             "shares": 10
         }
         response = requests.post(self.BASE_URL, json=stock_data)
