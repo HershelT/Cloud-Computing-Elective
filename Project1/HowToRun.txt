@@ -1,0 +1,5 @@
+// Pulling Docker
+docker pull hershelt/project1:latest
+// Running Docker
+docker run -p 5001:5001 hershelt/project1:latest
+// GO to postman and run your requests
