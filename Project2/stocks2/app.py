@@ -4,7 +4,7 @@ import requests
 from bson import ObjectId
 from datetime import datetime
 
-from Project2.APIKEY import KEY
+from APIKEY import KEY
 
 import os
 
