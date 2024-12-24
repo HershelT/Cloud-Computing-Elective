@@ -27,7 +27,7 @@ def create_stock():
         #Grab the stock from the request
         stock_data = request.json
         #check Required fields
-        required_fields = ['purchase_price', 'symbol', 'shares']
+        required_fields = ['purchase price', 'symbol', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
         #Check if the stock symbol is already provided
@@ -35,25 +35,25 @@ def create_stock():
             print("POST request error: symbol already exists")
             return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock name is already provided
-        if 'name' not in stock_data:
+        if 'name' not in stock_data: 
             name = "NA"
         else:
             name = stock_data['name']
-        #Check if purchase_date is provided
-        if 'purchase_date' not in stock_data:
+        #Check if purchase date is provided
+        if 'purchase date' not in stock_data:
             purchase_date = "NA"
         else:
-            purchase_date = stock_data['purchase_date']
+            purchase_date = stock_data['purchase date']
         stock = {
             "name": name,
             "symbol": stock_data['symbol'].upper(),
-            "purchase_price": round(float(stock_data['purchase_price']), 2),
-            "purchase_date": purchase_date,
+            "purchase price": round(float(stock_data['purchase price']), 2),
+            "purchase date": purchase_date,
             "shares": int(stock_data['shares']),
         }
         #Add stock to global dictionary
         result = collection.insert_one(stock)
-        response_data = {"_id" : str(result.inserted_id)}
+        response_data = {"id" : str(result.inserted_id)}
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
@@ -69,13 +69,13 @@ def get_stocks():
       for stock in collection.find():
         match = True
         if 'portfolio' in filters:
-            match = match and stock['_id'].startswith(filters['portfolio'])
+            match = match and stock['id'].startswith(filters['portfolio'])
         if 'numsharesgt' in filters:
             match = match and float(stock['shares']) > float(filters['numsharesgt'])
         if 'numshareslt' in filters:
             match = match and float(stock['shares']) < float(filters['numshareslt'])
         if match:
-          stock['_id'] = str(stock['_id'])
+          stock['id'] = str(stock['id'])
           filtered_stocks.append(stock)
       return jsonify(filtered_stocks), 200
     except Exception as e:
@@ -86,9 +86,9 @@ def get_stocks():
 def get_stock(stock_id):
     print("Getting stock with id: ", stock_id)
     try:
-        stock = collection.find_one({"_id":stock_id})
+        stock = collection.find_one({"id":stock_id})
         if stock:
-          stock['_id'] = str(stock['_id'])
+          stock['id'] = str(stock['id'])
           return jsonify(stock), 200
         else:
             print("GET request error: no such ID")
@@ -102,7 +102,7 @@ def get_stock(stock_id):
 def delete_stock(stock_id):
     print("Deleting stock with id: ", stock_id)
     try:
-        result = collection.delete_one({"_id":stock_id})
+        result = collection.delete_one({"id":stock_id})
         if result.deleted_count == 0:
             print("DELETE request error: no such ID")
             return jsonify({"error" : "Not found"}), 404
@@ -121,15 +121,15 @@ def update(stock_id):
             return jsonify({"error" : "Expected application/json media type"}), 415
         stock_data = request.get_json()
         #check if ALL fields are provided
-        required_fields = ['name', 'symbol', 'purchase_price', 'purchase_date', 'shares']
+        required_fields = ['name', 'symbol', 'purchase price', 'purchase date', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
         #Check if the stock exists
-        result = collection.update_one({"_id":stock_id}, { "$set": {
+        result = collection.update_one({"id":stock_id}, { "$set": {
             "name": stock_data['name'],
             "symbol": stock_data['symbol'].upper(),
-            "purchase_price": round(float(stock_data['purchase_price']), 2),
-            "purchase_date": stock_data['purchase_date'],
+            "purchase price": round(float(stock_data['purchase price']), 2),
+            "purchase date": stock_data['purchase date'],
             "shares": int(stock_data['shares']),
         }})
         if result.matched_count == 0:
@@ -138,20 +138,20 @@ def update(stock_id):
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-    return jsonify({"_id" : stock_id}), 200
+    return jsonify({"id" : stock_id}), 200
 
 #GET stock-value/<id>
 @app.route('/stock-value/<stock_id>', methods=['GET'])
 def get_stock_value(stock_id):
     print("Getting stock value with id: ", stock_id)
     try:
-        stock = collection.find_one({'_id': stock_id})
+        stock = collection.find_one({'id': stock_id})
         if not stock:
             print("GET request error: no such ID")
             return jsonify({"error" : "Not found"}), 404
         #Get the stock symbol
         symbol = stock['symbol']
-        #Get the stock purchase_price
+        #Get the stock purchase price
         api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
         response = requests.get(api_url, headers={'X-Api-Key': KEY})
         #Check if the response is valid
@@ -179,10 +179,10 @@ def get_portfolio_value():
     print("Getting portfolio value")
     try:
         total_value = 0
-        for stock in collection.find():
+        for stock in list(collection.find()):
             #Get the stock symbol
             symbol = stock['symbol']
-            #Get the stock purchase_price
+            #Get the stock purchase price
             api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
             response = requests.get(api_url, headers={'X-Api-Key': KEY})
             #Check if the response is valid
