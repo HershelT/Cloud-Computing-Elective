@@ -12,7 +12,7 @@ def get_total_gain(stocks, stock_database_url):
         response = requests.get(f"{stock_database_url}/stock-value/{stock['_id']}")
         if response.status_code == 200:
             # If the response is valid, calculate the total gain
-            total_gain += response.json()['stock value'] - (stock['purchase price'] * stock['shares'])
+            total_gain += float(response.json()['stock value']) - (float(stock['purchase price']) * float(stock['shares']))
     return total_gain
 
 # Route to calculate the capital gains which takes in query parameters (if any)
