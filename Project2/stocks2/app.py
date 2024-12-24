@@ -72,8 +72,7 @@ def get_stocks():
       filtered_stocks = []
       for stock in collection.find():
         match = True
-        if 'portfolio' in filters:
-            match = match and stock['_id'].startswith(filters['portfolio'])
+        # Check if the stock matches the filters from the query string
         if 'numsharesgt' in filters:
             match = match and float(stock['shares']) > float(filters['numsharesgt'])
         if 'numshareslt' in filters:
