@@ -23,23 +23,39 @@ def capital_gains():
     get_stock2 = True
     total_gains_stock1 = 0
     total_gains_stock2 = 0
+    query_string = ''
     # check if portfolio is stock1 or stock2
-    if 'portfolio' in filters:
-        if filters['portfolio'] == 'stock1':
-            get_stock2 = False
-        elif filters['portfolio'] == 'stock2':
-            get_stock1 = False
-    # filter by number of shares and append to url
+    valid_query = True
+    valid_queries = ['portfolio', 'numsharesgt', 'numshareslt']
+    if '?' in request.url:
+      if not all(key in valid_queries for key in filters.keys()):
+        valid_query = False
+      if 'portfolio' in filters:
+        if filters['portfolio'] == 'stocks1':
+          get_stock2 = False
+        elif filters['portfolio'] == 'stocks2':
+          get_stock1 = False
+        else:
+          valid_query = False
+      # filter by number of shares and append to url
+      if 'numsharesgt' in filters:
+        gt = filters['numsharesgt']
+        if gt.isdigit():
+          query_string += '&numsharesgt=' + gt
+        else:
+          valid_query = False
+      if 'numshareslt' in filters:
+        lt = filters['numshareslt']
+        if lt.isdigit():
+          query_string += '&numshareslt=' + lt
+        else:
+          valid_query = False
+    if not valid_query:
+      return jsonify({"error": f"Invalid query {filters}"}), 400
     if get_stock1:
-        if 'numsharesgt' in filters:
-            stocks1_url += '&numsharesgt=' + filters['numsharesgt']
-        if 'numshareslt' in filters:
-            stocks1_url += '&numshareslt=' + filters['numshareslt']
-    elif get_stock2:
-        if 'numsharesgt' in filters:
-            stocks2_url += '&numsharesgt=' + filters['numsharesgt']
-        if 'numshareslt' in filters:
-            stocks2_url += '&numshareslt=' + filters['numshareslt']
+      stocks1_url += query_string
+    if get_stock2:
+      stocks2_url += query_string
     
     # get stocks from the appropriate data source
     # Then call get_total_gain to calculate the total gains
