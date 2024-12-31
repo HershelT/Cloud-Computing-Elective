@@ -129,6 +129,10 @@ def update(stock_id):
         required_fields = ['name', 'symbol', 'purchase price', 'purchase date', 'shares']
         if not all(field in stock_data for field in required_fields):
             return jsonify({"error:" : "Malformed data"}), 400
+        # If 'id' or '_id' is not provided, return error
+        if 'id' not in stock_data and '_id' not in stock_data:
+            return jsonify({"error:" : "Malformed data"}), 400
+        
         #Check if the stock exists
         result = collection.update_one({"_id":stock_id}, { "$set": {
             "name": stock_data['name'],
