@@ -9,7 +9,7 @@ def get_total_gain(stocks, stock_database_url):
     # Loop through each stock and get the /stock-value from the appropriate data source
     for stock in stocks:
         # Get the stock value from the stock database
-        response = requests.get(f"{stock_database_url}/stock-value/{stock['_id']}")
+        response = requests.get(f"{stock_database_url}/stock-value/{stock['id']}")
         if response.status_code == 200:
             # If the response is valid, calculate the total gain
             total_gain += float(response.json()['stock value']) - (float(stock['purchase price']) * float(stock['shares']))

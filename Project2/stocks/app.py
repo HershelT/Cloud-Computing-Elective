@@ -13,7 +13,7 @@ app = Flask(__name__)
 # Initialize MongoDB client
 mongo_client = MongoClient('mongodb://mongodb:27017/')  # Assumes 'mongodb' as the service name
 db = mongo_client['stock_data'] #Use the stock_data database
-collection_name = os.getenv('COLLECTION_NAME','stocks2') # Can be 'stocks1' or 'stocks2'
+collection_name = os.environ.get('COLLECTION_NAME') # Can be 'stocks1' or 'stocks2'
 collection = db[collection_name] #Create or use an existing collection
 
 
@@ -48,7 +48,7 @@ def create_stock():
         # Create a new stock object
         stock_id = str(ObjectId())
         stock = {
-            "_id": stock_id,
+            "id": stock_id,
             "name": name,
             "symbol": stock_data['symbol'].upper(),
             "purchase price": round(float(stock_data['purchase price']), 2),
@@ -57,7 +57,7 @@ def create_stock():
         }
         #Add stock to global dictionary
         result = collection.insert_one(stock)
-        response_data = {"_id" : stock_id}
+        response_data = {"id" : str(stock_id)}
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
@@ -78,7 +78,7 @@ def get_stocks():
         if 'numshareslt' in filters:
             match = match and float(stock['shares']) < float(filters['numshareslt'])
         if match:
-          stock['_id'] = str(stock['_id'])
+          stock['id'] = str(stock.pop('_id'))
           filtered_stocks.append(stock)
       return jsonify(filtered_stocks), 200
     except Exception as e:
@@ -89,9 +89,10 @@ def get_stocks():
 def get_stock(stock_id):
     print("Getting stock with id: ", stock_id)
     try:
-        stock = collection.find_one({"_id": stock_id})
+        stock = collection.find_one({"_id": ObjectId(stock_id)})
         if stock:
           stock['_id'] = str(stock['_id'])
+          stock['id'] = stock.pop('_id')
           return jsonify(stock), 200
         else:
             print("GET request error: no such ID")
@@ -105,7 +106,7 @@ def get_stock(stock_id):
 def delete_stock(stock_id):
     print("Deleting stock with id: ", stock_id)
     try:
-        result = collection.delete_one({"_id":stock_id})
+        result = collection.delete_one({"_id": ObjectId(stock_id)})
         if result.deleted_count == 0:
             print("DELETE request error: no such ID")
             return jsonify({"error" : "Not found"}), 404
@@ -117,7 +118,7 @@ def delete_stock(stock_id):
 #PUT /stocks/<id>
 @app.route('/stocks/<stock_id>', methods=['PUT'])
 def update(stock_id):
-    print("Updating stock with id: ", stock_id)
+    print("Updating stock with id: ", ObjectId(stock_id))
     try:
         content_type = request.headers.get('Content-Type')
         if content_type != 'application/json':
@@ -131,7 +132,8 @@ def update(stock_id):
         if 'id' not in stock_data and '_id' not in stock_data:
             return jsonify({"error:" : "Malformed data"}), 400
         #Check if the stock exists
-        result = collection.update_one({"_id":stock_id}, { "$set": {
+        result = collection.update_one({"_id":ObjectId(stock_id)}, { "$set": {
+            "id": str(stock_id),
             "name": stock_data['name'],
             "symbol": stock_data['symbol'].upper(),
             "purchase price": round(float(stock_data['purchase price']), 2),
@@ -144,14 +146,15 @@ def update(stock_id):
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-    return jsonify({"_id" : stock_id}), 200
+    return jsonify({"id" : str(stock_id)}), 200
 
 #GET stock-value/<id>
 @app.route('/stock-value/<stock_id>', methods=['GET'])
 def get_stock_value(stock_id):
     print("Getting stock value with id: ", stock_id)
     try:
-        stock = collection.find_one({'_id': stock_id})
+        # Convert stock_id to ObjectId
+        stock = collection.find_one({'_id': ObjectId(stock_id)})
         if not stock:
             print("GET request error: no such ID")
             return jsonify({"error" : "Not found"}), 404

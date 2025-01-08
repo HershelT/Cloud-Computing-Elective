@@ -6,7 +6,7 @@ services:
     volumes:
       - ./mongo-data:/data/db
   stocks1-a:
-    build: ./stocks1
+    build: ./stocks
     ports: 
       - "5001:8000" #Host Port:Container Port
     expose:
@@ -17,7 +17,7 @@ services:
       - mongodb
     restart: always
   stocks1-b:
-    build: ./stocks1
+    build: ./stocks
     ports: 
       - "5004:8000"
     expose:
@@ -28,11 +28,13 @@ services:
       - mongodb
     restart: always
   stocks2:
-    build: ./stocks2
+    build: ./stocks
     ports: 
       - "5002:8000"
     expose:
       - "8000"
+    environment:
+      - COLLECTION_NAME=stocks2
     depends_on:
       - mongodb
     restart: always

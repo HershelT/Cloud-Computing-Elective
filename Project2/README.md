@@ -18,6 +18,8 @@ To test the project you can use Postman or any other API testing tool.
 The NGINX server is running on port 80 and only accepts Get requests for the `/stocks1` and `/stocks2` endpoints.
 The NGINX will then route the requests to the respective stocks1 and stocks2 servers using the container port 8000.
 
+Website can be accessed at `http:/localhost`
+
 Functions of the NGINX server:
 
 `/stocks1` endpoint that routes to the stocks1 server.
