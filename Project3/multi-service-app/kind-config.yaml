@@ -3,7 +3,7 @@ kind: Cluster
 nodes:
   - role: control-plane
     extraPortMappings:
-      - containerPort: 30080 # NodePort of the sample-app service
+      - containerPort: 30080 # NodePort of the stocks service
         hostPort: 8080     
       - containerPort: 31322 # NodePort of the nginx service
         hostPort: 80

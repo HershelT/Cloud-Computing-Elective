@@ -76,7 +76,7 @@ def capital_gains():
     return jsonify({'total gains': total_gains_stock1}), 200
 
 if __name__ == '__main__':
-    app.logger.setLevel('INFO-CAPITAL-GAINS')
+    app.logger.setLevel('INFO')
     port = int(os.environ.get('PORT', 8080))
     print(f"Starting capital-gains service on port {port}")
     app.run(host='0.0.0.0', port=8080)
