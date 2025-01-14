@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: multi-service-app
+data:
+# This micro-service is used as a reverse proxy for accessing the stocks service. (as done in assignment #2). A user from outside of the cluster interacts with this service only. The NGINX proxy should forward each request to the relevant service according to the request's path (e.g. /stocks, /capital-gains, etc.).
+  nginx.conf: |
+    events {}
+    http {
+      server {
+        listen 80;
+        location /stocks {
+          proxy_pass http://stocks-service:80;
+        }
+        location /capital-gains {
+          proxy_pass http://capital_gains_service:80;
+        }
+      }
+
