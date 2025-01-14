@@ -184,3 +184,41 @@ def update(stock_id):
         return jsonify({"server error" : str(e)}), 500
     return jsonify({"id" : str(stock_id)}), 200
 
+#GET stock-value/<id>
+@app.route('/stock-value/<stock_id>', methods=['GET'])
+@LATENCY.time()
+def get_stock_value(stock_id):
+    print("Getting stock value with id: ", stock_id)
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are getting the stock value
+    app.logger.info(f"Getting stock value with id: {stock_id}")
+    try:
+        # Convert stock_id to ObjectId
+        stock = collection.find_one({'_id': ObjectId(stock_id)})
+        if not stock:
+            print("GET request error: no such ID")
+            return jsonify({"error" : "Not found"}), 404
+        #Get the stock symbol
+        symbol = stock['symbol']
+        #Get the stock purchase price
+        api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
+        response = requests.get(api_url, headers={'X-Api-Key': KEY})
+        #Check if the response is valid
+        if not response.status_code == requests.codes.ok:
+            print("GET request error: ", response.status_code)
+            return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
+        #Get the current stock price from response
+        current_price = response.json()['price']
+        #Calculate the stock value times how many shares
+        stock_value = round(float(current_price * stock['shares']), 2)
+        #return a json with the stock value
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({
+            "symbol": symbol,
+            "ticker": current_price,
+            "stock value": stock_value
+        }), 200
+
