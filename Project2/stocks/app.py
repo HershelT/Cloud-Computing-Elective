@@ -36,15 +36,9 @@ def create_stock():
             print("POST request error: symbol already exists")
             return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock name is already provided
-        if 'name' not in stock_data: 
-            name = "NA"
-        else:
-            name = stock_data['name']
+        name = stock_data.get('name', "NA")
         #Check if purchase date is provided
-        if 'purchase date' not in stock_data:
-            purchase_date = "NA"
-        else:
-            purchase_date = stock_data['purchase date']
+        purchase_date = stock_data.get('purchase date', "NA")
         # Create a new stock object
         stock_id = str(ObjectId())
         stock = {
