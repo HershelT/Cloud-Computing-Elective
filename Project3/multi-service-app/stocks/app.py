@@ -147,3 +147,40 @@ def delete_stock(stock_id):
         return jsonify({"server error" : str(e)}), 500
     
 # PUT /stocks/<id>
+@app.route('/stocks/<stock_id>', methods=['PUT'])
+@LATENCY.time()
+def update(stock_id):
+    print("Updating stock with id: ", ObjectId(stock_id))
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are updating a stock
+    app.logger.info(f"Updating stock with id: {stock_id}")
+    try:
+        content_type = request.headers.get('Content-Type')
+        if content_type != 'application/json':
+            return jsonify({"error" : "Expected application/json media type"}), 415
+        stock_data = request.get_json()
+        #check if ALL fields are provided
+        required_fields = ['name', 'symbol', 'purchase price', 'purchase date', 'shares']
+        if not all(field in stock_data for field in required_fields):
+            return jsonify({"error:" : "Malformed data"}), 400
+        # If 'id' or '_id' is not provided, return error
+        if 'id' not in stock_data and '_id' not in stock_data:
+            return jsonify({"error:" : "Malformed data"}), 400
+        #Check if the stock exists
+        result = collection.update_one({"_id":ObjectId(stock_id)}, { "$set": {
+            "id": str(stock_id),
+            "name": stock_data['name'],
+            "symbol": stock_data['symbol'].upper(),
+            "purchase price": round(float(stock_data['purchase price']), 2),
+            "purchase date": stock_data['purchase date'],
+            "shares": int(stock_data['shares']),
+        }})
+        if result.matched_count == 0:
+            print("PUT request error: no such ID")
+            return jsonify({"error" : "Not found"}), 404
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({"id" : str(stock_id)}), 200
+
