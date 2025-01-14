@@ -129,3 +129,21 @@ def get_stock(stock_id):
         return jsonify({"server error" : str(e)}), 500
 
 # DELETE /stocks/<id>
+@app.route('/stocks/<stock_id>', methods=['DELETE'])
+@LATENCY.time()
+def delete_stock(stock_id):
+    print("Deleting stock with id: ", stock_id)
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are deleting a stock
+    app.logger.info(f"Deleting stock with id: {stock_id}")
+    try:
+        result = collection.delete_one({"_id": ObjectId(stock_id)})
+        if result.deleted_count == 0:
+            return jsonify({"error" : "Not found"}), 404
+        return '', 204
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    
+# PUT /stocks/<id>
