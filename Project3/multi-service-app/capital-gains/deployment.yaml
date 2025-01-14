@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capital-gains
+  namespace: multi-service-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: capital-gains
+  template:
+    metadata:
+      labels:
+        app: capital-gains
+    spec:
+      containers:
+      - name: capital-gains
+        image: capital-gains:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080 
+        resources:
+          requests:
+            cpu: 200m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        

@@ -1,0 +1,24 @@
+# apiVersion: apps/v1
+# This micro-service is used as a reverse proxy for accessing the stocks service. (as done in assignment #2). A user from outside of the cluster interacts with this service only. The NGINX proxy should forward each request to the relevant service according to the request's path (e.g. /stocks, /capital-gains, etc.).
+# To implement this micro-service you need to create the following files:
+# deployment.yaml - YAML specification of the Deployment Kubernetes resource that describes the nginx Pod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+            
