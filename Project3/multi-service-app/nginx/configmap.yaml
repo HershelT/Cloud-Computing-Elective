@@ -8,13 +8,22 @@ data:
   nginx.conf: |
     events {}
     http {
+      upstream stocks-service {
+        server stocks-service-1.multi-service-app.svc.cluster.local:8000 weight=3;
+        server stocks-service-2.multi-service-app.svc.cluster.local:8000 weight=1;
+      }
+
+      upstream capital_gains_service {
+        server capital-gains-service-1.multi-service-app.svc.cluster.local:8000 weight=3;
+      }
+
       server {
         listen 80;
         location /stocks {
-          proxy_pass http://stocks-service:80;
+          proxy_pass http://stocks-service;
         }
         location /capital-gains {
-          proxy_pass http://capital_gains_service:80;
+          proxy_pass http://capital_gains_service;
         }
       }
 
