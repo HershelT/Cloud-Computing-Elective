@@ -79,4 +79,53 @@ def create_stock():
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
 
+# GET /stocks
+@app.route('/stocks', methods=['GET'])
+@LATENCY.time()
+def get_stocks():
+    print("Getting all stocks")
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are getting all stocks
+    app.logger.info("Getting all stocks")
+    try:
+      filters = request.args.to_dict()
+      filtered_stocks = []
+      for stock in collection.find():
+        match = True
+        # Check if the stock matches the filters from the query string
+        if 'numsharesgt' in filters:
+            match = match and float(stock['shares']) > float(filters['numsharesgt'])
+        if 'numshareslt' in filters:
+            match = match and float(stock['shares']) < float(filters['numshareslt'])
+        if match:
+          stock['id'] = str(stock.pop('_id'))
+          filtered_stocks.append(stock)
+      return jsonify(filtered_stocks), 200
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
 
+# GET /stocks/<id>
+@app.route('/stocks/<stock_id>', methods=['GET'])
+@LATENCY.time()
+def get_stock(stock_id):
+    print("Getting stock with id: ", stock_id)
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are getting a stock
+    app.logger.info(f"Getting stock with id: {stock_id}")
+    try:
+        stock = collection.find_one({"_id": ObjectId(stock_id)})
+        if stock:
+          stock['_id'] = str(stock['_id'])
+          stock['id'] = stock.pop('_id')
+          return jsonify(stock), 200
+        else:
+            print("GET request error: no such ID")
+            return jsonify({"error" : "Not found"}), 404
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+
+# DELETE /stocks/<id>
