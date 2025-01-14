@@ -222,3 +222,67 @@ def get_stock_value(stock_id):
             "stock value": stock_value
         }), 200
 
+#GET /portfolio-value
+@app.route('/portfolio-value', methods=['GET'])
+@LATENCY.time()
+def get_portfolio_value():
+    print("Getting portfolio value")
+    # Log in console the request
+    REQUESTS.inc()
+    # Log that we are getting the portfolio value
+    app.logger.info("Getting portfolio value")
+    try:
+        total_value = 0
+        for stock in list(collection.find()):
+            #Get the stock symbol
+            symbol = stock['symbol']
+            #Get the stock purchase price
+            api_url = 'https://api.api-ninjas.com/v1/stockprice?ticker={}'.format(symbol)
+            response = requests.get(api_url, headers={'X-Api-Key': KEY})
+            #Check if the response is valid
+            if not response.status_code == requests.codes.ok:
+                print("GET request error: ", response.status_code)
+                return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
+            #Get the current stock price from response
+            current_price = response.json()['price']
+            #Calculate the stock value times how many shares
+            stock_value = int(current_price) * int(stock['shares'])
+            #Add the stock value to the total value
+            total_value += stock_value
+    except Exception as e:
+        print("Exception: ", str(e))
+        return jsonify({"server error" : str(e)}), 500
+    return jsonify({
+        # REturn date in Day mont year format (DD-MM-YYYY)
+        "date" : datetime.now().strftime("%d-%m-%Y"),
+        "portfolio value": round(float(total_value), 2)
+    }), 200
+
+#GET /kill
+@app.route('/kill', methods=['GET'])
+def kill_container():
+  os._exit(1)
+
+#GET podName
+@app.route('/podName', methods=['GET'])
+@LATENCY.time()
+def get_pod_name():
+    return hostname, 200
+
+#GET /healthz
+@app.route('/healthz', methods=['GET'])
+def healthz():
+    return 'OK', 200
+
+#GET /metrics
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
+# Starting the service
+if __name__ == '__main__':
+    # Add debug logging
+    app.logger.setLevel('INFO')
+    port = int(os.getenv('PORT', 8000))
+    print(f"Starting the Stock Portfolio Service on port {port}")
+    app.run(host='0.0.0.0', port=port, debug=True)
