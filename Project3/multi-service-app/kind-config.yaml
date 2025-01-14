@@ -1,0 +1,10 @@
+apiVersion: kind.x-k8s.io/v1alpha4
+kind: Cluster
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080 # NodePort of the sample-app service
+        hostPort: 8080     
+      - containerPort: 31322 # NodePort of the nginx service
+        hostPort: 80
+    
