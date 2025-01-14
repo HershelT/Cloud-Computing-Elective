@@ -4,17 +4,17 @@ metadata:
   name: nginx-config
   namespace: multi-service-app
 data:
-# This micro-service is used as a reverse proxy for accessing the stocks service. (as done in assignment #2). A user from outside of the cluster interacts with this service only. The NGINX proxy should forward each request to the relevant service according to the request's path (e.g. /stocks, /capital-gains, etc.).
   nginx.conf: |
     events {}
+
     http {
+    # do a weighted round robin between each stock
       upstream stocks-service {
-        server stocks-service-1.multi-service-app.svc.cluster.local:8000 weight=3;
-        server stocks-service-2.multi-service-app.svc.cluster.local:8000 weight=1;
+        server stocks-service.multi-service-app.svc.cluster.local:8000;
       }
 
       upstream capital_gains_service {
-        server capital-gains-service-1.multi-service-app.svc.cluster.local:8000 weight=3;
+        server capital-gains-service.multi-service-app.svc.cluster.local:8080;
       }
 
       server {
@@ -26,4 +26,6 @@ data:
           proxy_pass http://capital_gains_service;
         }
       }
+    }
+
 

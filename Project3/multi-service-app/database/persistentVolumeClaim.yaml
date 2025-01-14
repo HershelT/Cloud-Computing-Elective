@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: stocks-pvc
+  name: mongo-pvc
   namespace: multi-service-app
 spec:
   accessModes:
