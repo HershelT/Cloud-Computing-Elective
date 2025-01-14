@@ -8,7 +8,6 @@ data:
     events {}
 
     http {
-    # do a weighted round robin between each stock
       upstream stocks-service {
         server stocks-service.multi-service-app.svc.cluster.local:8000;
       }
