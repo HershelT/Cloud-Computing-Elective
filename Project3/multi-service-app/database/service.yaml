@@ -8,6 +8,6 @@ spec:
   type: NodePort 
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 5000
+      port: 27017
+      targetPort: 27017
       nodePort: 30080

@@ -79,5 +79,5 @@ if __name__ == '__main__':
     app.logger.setLevel('INFO')
     port = int(os.environ.get('PORT', 8080))
     print(f"Starting capital-gains service on port {port}")
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=port, debug=True)
 

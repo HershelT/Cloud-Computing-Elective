@@ -8,21 +8,13 @@ data:
     events {}
 
     http {
-      upstream stocks-service {
-        server stocks-service.multi-service-app.svc.cluster.local:8000;
-      }
-
-      upstream capital_gains_service {
-        server capital-gains-service.multi-service-app.svc.cluster.local:8080;
-      }
-
       server {
         listen 80;
         location /stocks {
           proxy_pass http://stocks-service;
         }
         location /capital-gains {
-          proxy_pass http://capital_gains_service;
+          proxy_pass http://capital-gains-service;
         }
       }
     }
