@@ -25,11 +25,11 @@ request_count = 0
 MEMORY_GROWTH_FACTOR = 5  # MB per request
 memory_cache = []
 
-# Initialize MongoDB client
-mongo_client = MongoClient('mongodb://mongodb:27017/')  # Assumes 'mongodb' as the service name
+# Initialize MongoDB client deployed in the same Kubernetes cluster
+mongo_client = MongoClient('mongodb://mongodb.multi-service-app.svc.cluster.local:27017/')  # Assumes 'mongodb' as the service name
 db = mongo_client['stock_data'] #Use the stock_data database
-collection_name = os.environ.get('COLLECTION_NAME') # only allowed to be 'stocks1'.
-collection = db[collection_name] #Create or use an existing collection
+# collection_name = os.environ.get('COLLECTION_NAME') # only allowed to be 'stocks1'.
+collection = db["stocks"] #Create or use an existing collection
 
 # Get the hostname of the pod for testing purposes
 hostname = socket.gethostname()
@@ -77,6 +77,7 @@ def create_stock():
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
+        app.logger.error(f"Error creating stock: {str(e)}")
         return jsonify({"server error" : str(e)}), 500
 
 # GET /stocks

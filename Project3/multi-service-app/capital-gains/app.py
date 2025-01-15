@@ -45,7 +45,7 @@ def capital_gains():
     app.logger.info('Request received for /capital-gains')
 
     filters = request.args.to_dict()
-    stocks1_url = 'http://stocks-service.multi-service-app.svc.cluster.local/stocks'
+    stocks1_url = ' http://stocks-service/stocks'
     total_gains_stock1 = 0
     query_string = '?'
     valid_query = True
@@ -72,7 +72,7 @@ def capital_gains():
     response = requests.get(stocks1_url + query_string)
     if response.status_code == 200:
         stocks = response.json()
-        total_gains_stock1 = get_total_gain(stocks, 'http://stock-database.multi-service-app.svc.cluster.local')
+        total_gains_stock1 = get_total_gain(stocks, ' http://stocks-service')
     return jsonify({'total gains': total_gains_stock1}), 200
 
 if __name__ == '__main__':

@@ -2,12 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
+  namespace: multi-service-app
 spec:
   selector:
     app: mongo
   type: NodePort 
   ports:
     - protocol: TCP
-      port: 80
+      port: 27017
       targetPort: 27017
       nodePort: 30017
