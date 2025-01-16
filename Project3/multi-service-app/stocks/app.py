@@ -3,6 +3,8 @@ from pymongo import MongoClient
 import requests
 from bson import ObjectId
 from datetime import datetime
+import subprocess
+
 
 # Added for kubernetics
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -298,12 +300,33 @@ def get_portfolio_value():
         "portfolio value": round(float(total_value), 2)
     }), 200
 
-#GET /kill
+# #GET /kill
+# @app.route('/kill', methods=['GET'])
+# def kill_container():
+#     # restart the database
+#     # Find the id of mongo-deployment and fecth the response
+#     response = os.popen('kubectl get pods -n multi-service-app | grep mongo-deployment').read()
+#     response = response.split(' ')[0]
+#     # Delete the pod
+#     os.system(f'kubectl delete pod {response} -n multi-service-app')
+#     return f'Killing the container{response}', 200
+
 @app.route('/kill', methods=['GET'])
 def kill_container():
-    #Detsroy the database to see if the service can recover
-    collection.drop()
-    return '', 204
+    try:
+        # Find the id of mongo-deployment pod
+        response = subprocess.check_output(
+            "kubectl get pods -n multi-service-app -o custom-columns=:metadata.name | grep mongo-deployment", shell=True
+        ).decode('utf-8').strip()
+        
+        # Delete the pod
+        subprocess.check_call(f'kubectl delete pod {response} -n multi-service-app', shell=True)
+        
+        return f'Killing the container {response}', 200
+    except subprocess.CalledProcessError as e:
+        return f'Error: {str(e)}', 500
+
+
 
 #GET podName
 @app.route('/podName', methods=['GET'])

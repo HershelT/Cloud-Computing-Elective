@@ -71,7 +71,7 @@ def delete_all():
 
 
 # post stock and get it
-def test_get():
+def test_post_get():
     # Delete all stocks
     delete_all()
     # Post Google Stock
@@ -94,12 +94,11 @@ def test_get():
     post_status = post_stock(google_stock)
     assert post_status[1] == 400
 
-def test_two():
+def test_put():
     # Replace the google stock with tesla
     id = get_stocks()[0][0]['id']
     put_status = put_stock(tesla_stock, id)
     # print this log
-    print()
     assert put_status[1] == 200
     # Ensure id is the same
     assert put_status[0]['id'] == id
@@ -110,6 +109,38 @@ def test_two():
     # Attempt to put stock with invalid id
     put_status = put_stock(tesla_stock, '123')
     assert put_status[1] == 404
+
+def test_del_stock():
+    id = get_stocks()[0][0]['id']
+    del_status = requests.delete(LOCAL_URL + 'stocks/' + id)
+    assert del_status.status_code == 204
+
+
+def test_stock_value():
+    google = post_stock(google_stock)
+    apple = post_stock(apple_stock)
+    nvidia = post_stock(nvidia_stock)
+
+    # Get the stock value of google
+    value_status = requests.get(LOCAL_URL + 'stock-value/' + google[0]['id'])
+    assert value_status.status_code == 200
+    # Get the stock value of apple
+    value_status = requests.get(LOCAL_URL + 'stock-value/' + apple[0]['id'])
+    assert value_status.status_code == 200
+    # Get the stock value of nvidia
+    value_status = requests.get(LOCAL_URL + 'stock-value/' + nvidia[0]['id'])
+    assert value_status.status_code == 200
+
+    # Assert that the value are over 0
+    assert value_status.json()['stock value'] > 0
+
+def test_capital_gains():
+    # get capital gains
+    gains = requests.get(LOCAL_URL + 'capital-gains')
+    assert gains.status_code == 200
+    # Assert total gains is greater than 200
+    assert gains.json()['total gains'] > 200
+    
 
 # Run test_one
 if __name__ == "__main__":
