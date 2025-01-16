@@ -34,8 +34,8 @@ tesla_stock = {
     "shares": 42,
     "symbol": "TSLA"
 }
-
-ALL_STOCKS = [google_stock, apple_stock, nvidia_stock, tesla_stock]
+# Store all stocks [0, 1, 2, 3]
+# ALL_STOCKS = [google_stock, apple_stock, nvidia_stock, tesla_stock]
 
 # URL of kubernetics cluster, access everything throughb nginx
 LOCAL_URL = 'http://127.0.0.1:80/'
@@ -45,12 +45,19 @@ LOCAL_URL = 'http://127.0.0.1:80/'
 
 
 # Post stocks to the stocks service
-def post_stock(id):
+def post_stock(stock):
     # Post stocks to the stocks service
-    response = requests.post(LOCAL_URL + 'stocks', json=google_stock)
-    # assert response.status_code == 201
-    # Return id created from "id" : <id> and status code
-    return [response.json()['id'], response.status_code]
+    response = requests.post(LOCAL_URL + 'stocks', json=stock)
+    # Return response and status code
+    return [response.json(), response.status_code]
+
+def put_stock(stock, id):
+    # add "id" label to copy of stock
+    deepcopy_stock = stock.copy()
+    deepcopy_stock['id'] = id
+    # Put the stock
+    response = requests.put(LOCAL_URL + 'stocks/' + id, json=deepcopy_stock)
+    return [response.json(), response.status_code]
 
 def get_stocks():
     response = requests.get(LOCAL_URL + 'stocks')
@@ -59,7 +66,7 @@ def get_stocks():
 
 # Delete all stocks that were posted
 def delete_all():
-    response = get_stocks()
+    response = get_stocks()[0]
     for stock in response:
         id = stock['id']
         response = requests.delete(LOCAL_URL + 'stocks/' + id)
@@ -68,15 +75,15 @@ def delete_all():
 
 
 # post stock and get it
-def test_one():
+def test_get():
     # Delete all stocks
     delete_all()
     # Post Google Stock
-    post_result = post_stock(0)
+    post_result = post_stock(google_stock)
     # Test if the stock was posted
     assert post_result[1] == 201
     # Get the id of the stock  
-    id = post_result[0]
+    id = post_result[0]['id']
     # Get all stocks
     get_result = get_stocks()
     # Check if the get request was successful
@@ -87,17 +94,28 @@ def test_one():
     for stock in all_stocks:
         if stock['id'] == id:
             assert stock["symbol"] == google_stock["symbol"]
-            return True
-    # Attempt to post same stock again
-    status = post_stock(0)
-    if status == 400:
-        return True
+    # Attempt to post same stock symbol again
+    post_status = post_stock(google_stock)
+    assert post_status[1] == 400
 
-
+def test_two():
+    # Replace the google stock with tesla
+    id = get_stocks()[0][0]['id']
+    put_status = put_stock(tesla_stock, id)
+    assert put_status[1] == 200
+    # Ensure id is the same
+    assert put_status[0]['id'] == id
+    # Get Stocks and ensure the new symbol is tesla symbol
+    for stock in get_stocks()[0]:
+        if stock['id'] == 3:
+            assert stock['symbol'] == tesla_stock['symbol']
+    # Attempt to put stock with invalid id
+    put_status = put_stock(tesla_stock, '123')
+    assert put_status[1] == 404
 
 # Run test_one
 if __name__ == "__main__":
-    print("Running test one")
-    pytest.main(['-k', 'test_one'])
+    print("Running tests")
+    pytest.main(['test_stocks.py'])
 
 

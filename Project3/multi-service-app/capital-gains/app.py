@@ -70,10 +70,10 @@ def capital_gains():
         if 'id' in filters:
             id = str(filters['id'])
             # Check if its valid hash
-            if len(id) != 24:
-                valid_query = False
-            else:
-                query_string += '&id=' + id
+            # if len(id) != 24:
+            #     valid_query = False
+            # else:
+            query_string += '&id=' + id
             
     if not valid_query:
         return jsonify({'error': f'Invalid query {filters}'}), 400

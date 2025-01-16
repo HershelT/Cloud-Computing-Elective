@@ -126,6 +126,11 @@ def get_stock(stock_id):
     REQUESTS.inc()
     # Log that we are getting a stock
     app.logger.info(f"Getting stock with id: {stock_id}")
+    # See if id is a valid ObjectId
+    try:
+        ObjectId(stock_id)
+    except:
+        return jsonify({"error" : "Not found"}), 404
     try:
         stock = collection.find_one({"_id": ObjectId(stock_id)})
         if stock:
@@ -148,6 +153,11 @@ def delete_stock(stock_id):
     REQUESTS.inc()
     # Log that we are deleting a stock
     app.logger.info(f"Deleting stock with id: {stock_id}")
+    # See if id is a valid ObjectId
+    try:
+        ObjectId(stock_id)
+    except:
+        return jsonify({"error" : "Not found"}), 404
     try:
         result = collection.delete_one({"_id": ObjectId(stock_id)})
         if result.deleted_count == 0:
@@ -166,6 +176,11 @@ def update(stock_id):
     REQUESTS.inc()
     # Log that we are updating a stock
     app.logger.info(f"Updating stock with id: {stock_id}")
+    # See if id is a valid ObjectId
+    try:
+        ObjectId(stock_id)
+    except:
+        return jsonify({"error" : "Not found"}), 404
     try:
         content_type = request.headers.get('Content-Type')
         if content_type != 'application/json':
@@ -213,6 +228,11 @@ def get_stock_value(stock_id):
     REQUESTS.inc()
     # Log that we are getting the stock value
     app.logger.info(f"Getting stock value with id: {stock_id}")
+    # See if id is a valid ObjectId
+    try:
+        ObjectId(stock_id)
+    except:
+        return jsonify({"error" : "Not found"}), 404
     try:
         # Convert stock_id to ObjectId
         stock = collection.find_one({'_id': ObjectId(stock_id)})
