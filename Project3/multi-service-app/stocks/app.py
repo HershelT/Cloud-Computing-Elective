@@ -82,7 +82,7 @@ def create_stock():
         }
         #Add stock to global dictionary
         result = collection.insert_one(stock)
-        response_data = {"id" : str(stock_id)}
+        response_data = {"id" : str(result.inserted_id)}
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
