@@ -40,10 +40,6 @@ tesla_stock = {
 # URL of kubernetics cluster, access everything throughb nginx
 LOCAL_URL = 'http://127.0.0.1:80/'
 
-
-
-
-
 # Post stocks to the stocks service
 def post_stock(stock):
     # Post stocks to the stocks service
@@ -102,6 +98,8 @@ def test_two():
     # Replace the google stock with tesla
     id = get_stocks()[0][0]['id']
     put_status = put_stock(tesla_stock, id)
+    # print this log
+    print()
     assert put_status[1] == 200
     # Ensure id is the same
     assert put_status[0]['id'] == id
@@ -116,6 +114,6 @@ def test_two():
 # Run test_one
 if __name__ == "__main__":
     print("Running tests")
-    pytest.main(['test_stocks.py'])
+    pytest.main()
 
 

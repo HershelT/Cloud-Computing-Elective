@@ -171,7 +171,6 @@ def delete_stock(stock_id):
 @app.route('/stocks/<stock_id>', methods=['PUT'])
 @LATENCY.time()
 def update(stock_id):
-    print("Updating stock with id: ", ObjectId(stock_id))
     # Log in console the request
     REQUESTS.inc()
     # Log that we are updating a stock
@@ -181,6 +180,7 @@ def update(stock_id):
         ObjectId(stock_id)
     except:
         return jsonify({"error" : "Not found"}), 404
+    print("Updating stock with id: ", ObjectId(stock_id))
     try:
         content_type = request.headers.get('Content-Type')
         if content_type != 'application/json':
@@ -301,7 +301,9 @@ def get_portfolio_value():
 #GET /kill
 @app.route('/kill', methods=['GET'])
 def kill_container():
-  os._exit(1)
+    #Detsroy the database to see if the service can recover
+    collection.drop()
+    return '', 204
 
 #GET podName
 @app.route('/podName', methods=['GET'])

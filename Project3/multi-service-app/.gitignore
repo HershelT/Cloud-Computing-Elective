@@ -1,2 +1,4 @@
 stocks/APIKEY.py
 APIKEY.py
+__pycache__
+.pytest_cache
