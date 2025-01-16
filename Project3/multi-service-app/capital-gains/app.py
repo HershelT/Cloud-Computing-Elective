@@ -68,7 +68,7 @@ def capital_gains():
                 valid_query = False
         # filter by stock id and append to url
         if 'id' in filters:
-            id = filters['id']
+            id = str(filters['id'])
             # Check if its valid hash
             if len(id) != 24:
                 valid_query = False

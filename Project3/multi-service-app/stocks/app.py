@@ -63,10 +63,10 @@ def create_stock():
         #Check if purchase date is provided
         purchase_date = stock_data.get('purchase date', "NA")
         try:
-            datetime.strptime(purchase_date, '%m-%d-%Y')
+            datetime.strptime(purchase_date, '%d-%m-%Y')
         except ValueError:
-            print("POST request error: purchase date is not in MM-DD-YYYY format")
-            app.logger.error(f"Error creating stock: purchase date {purchase_date} is not in MM-DD-YYYY format")
+            print("POST request error: purchase date is not in DD-MM-YYYY format")
+            app.logger.error(f"Error creating stock: purchase date {purchase_date} is not in DD-MM-YYYY format")
             return jsonify({"error" : "Malformed data"}), 400
         # Create a new stock object
         stock_id = str(ObjectId())
@@ -181,10 +181,10 @@ def update(stock_id):
             return jsonify({"error:" : "Malformed data"}), 400
         # Check if stock purchase dat is in MM-DD-YYYY format
         try:
-            datetime.strptime(stock_data['purchase date'], '%m-%d-%Y')
+            datetime.strptime(stock_data['purchase date'], '%d-%m-%Y')
         except ValueError:
-            print("PUT request error: purchase date is not in MM-DD-YYYY format")
-            app.logger.error(f"Error updating stock: purchase date {stock_data['purchase date']} is not in MM-DD-YYYY format")
+            print("POST request error: purchase date is not in DD-MM-YYYY format")
+            app.logger.error(f"Error creating stock: purchase date {stock_data['purchase date']} is not in DD-MM-YYYY format")
             return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock exists
         result = collection.update_one({"_id":ObjectId(stock_id)}, { "$set": {

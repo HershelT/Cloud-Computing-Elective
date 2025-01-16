@@ -10,9 +10,30 @@ data:
     http {
       server {
         listen 80;
+        
         location /stocks {
           proxy_pass http://stocks-service;
         }
+        location /stock-value {
+          proxy_pass http://stocks-service;
+        }
+        location /portfolio-value {
+          proxy_pass http://stocks-service;
+        }
+        location /kill {
+          proxy_pass http://stocks-service;
+        }
+        location /podName {
+          proxy_pass http://stocks-service;
+        }
+        location /healthz {
+          proxy_pass http://stocks-service;
+        }
+        location /metrics {
+          proxy_pass http://stocks-service;
+        }
+
+
         location /capital-gains {
           proxy_pass http://capital-gains-service;
         }

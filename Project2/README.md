@@ -64,3 +64,5 @@ Query parameters: (Can combine them using `&`)
 `?numshareslt=<num>` - The number of shares to filter by. Only stocks with less than the specified number of shares will be included in the calculation.
 
 `?numsharesgt=<num>` - The number of shares to filter by. Only stocks with more than the specified number of shares will be included in the calculation.
+
+`?id=<id>` - The ID to filter by. Only choose a stock with that ID.
