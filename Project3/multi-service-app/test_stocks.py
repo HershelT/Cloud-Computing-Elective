@@ -134,6 +134,13 @@ def test_stock_value():
     # Assert that the value are over 0
     assert value_status.json()['stock value'] > 0
 
+def test_portfolio_value():
+    # get portfolio value
+    value = requests.get(LOCAL_URL + 'portfolio-value')
+    assert value.status_code == 200
+    # Assert total value is greater than 200
+    assert value.json()['total value'] > 1000
+
 def test_capital_gains():
     # get capital gains
     gains = requests.get(LOCAL_URL + 'capital-gains')

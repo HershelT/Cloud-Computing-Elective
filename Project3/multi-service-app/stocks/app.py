@@ -316,9 +316,9 @@ def kill_container():
     try:
         # Find the id of mongo-deployment pod
         response = subprocess.check_output(
-            "kubectl get pods -n multi-service-app -o custom-columns=:metadata.name | grep mongo-deployment", shell=True
+            "kubectl get pods -n multi-service-app | grep mongo-deployment", shell=True
         ).decode('utf-8').strip()
-        
+        response = response.split(' ')[0]
         # Delete the pod
         subprocess.check_call(f'kubectl delete pod {response} -n multi-service-app', shell=True)
         
