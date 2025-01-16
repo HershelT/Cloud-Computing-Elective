@@ -39,6 +39,12 @@ def create_stock():
         name = stock_data.get('name', "NA")
         #Check if purchase date is provided
         purchase_date = stock_data.get('purchase date', "NA")
+        # Check if purchase_date is in correct format (MM-DD-YYYY)
+        try:
+            datetime.strptime(purchase_date, '%m-%d-%Y')
+        except ValueError:
+            print("POST request error: purchase date is not in MM-DD-YYYY format")
+            return jsonify({"error" : "Malformed data"}), 400
         # Create a new stock object
         stock_id = str(ObjectId())
         stock = {

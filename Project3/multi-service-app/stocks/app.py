@@ -56,11 +56,18 @@ def create_stock():
         #Check if the stock symbol is already provided
         if collection.find_one({'symbol': stock_data['symbol'].upper()}):
             print("POST request error: symbol already exists")
+            app.logger.error(f"Error creating stock: symbol {stock_data['symbol']} already exists")
             return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock name is already provided
         name = stock_data.get('name', "NA")
         #Check if purchase date is provided
         purchase_date = stock_data.get('purchase date', "NA")
+        try:
+            datetime.strptime(purchase_date, '%m-%d-%Y')
+        except ValueError:
+            print("POST request error: purchase date is not in MM-DD-YYYY format")
+            app.logger.error(f"Error creating stock: purchase date {purchase_date} is not in MM-DD-YYYY format")
+            return jsonify({"error" : "Malformed data"}), 400
         # Create a new stock object
         stock_id = str(ObjectId())
         stock = {
@@ -99,6 +106,9 @@ def get_stocks():
             match = match and float(stock['shares']) > float(filters['numsharesgt'])
         if 'numshareslt' in filters:
             match = match and float(stock['shares']) < float(filters['numshareslt'])
+        # Add a query to check if stock id is in the filters
+        if 'id' in filters:
+            match = match and str(stock['_id']) == filters['id']
         if match:
           stock['id'] = str(stock.pop('_id'))
           filtered_stocks.append(stock)
@@ -164,10 +174,18 @@ def update(stock_id):
         #check if ALL fields are provided
         required_fields = ['name', 'symbol', 'purchase price', 'purchase date', 'shares']
         if not all(field in stock_data for field in required_fields):
+            app.logger.error("Error updating stock: Malformed data")
             return jsonify({"error:" : "Malformed data"}), 400
         # If 'id' or '_id' is not provided, return error
         if 'id' not in stock_data and '_id' not in stock_data:
             return jsonify({"error:" : "Malformed data"}), 400
+        # Check if stock purchase dat is in MM-DD-YYYY format
+        try:
+            datetime.strptime(stock_data['purchase date'], '%m-%d-%Y')
+        except ValueError:
+            print("PUT request error: purchase date is not in MM-DD-YYYY format")
+            app.logger.error(f"Error updating stock: purchase date {stock_data['purchase date']} is not in MM-DD-YYYY format")
+            return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock exists
         result = collection.update_one({"_id":ObjectId(stock_id)}, { "$set": {
             "id": str(stock_id),
@@ -179,6 +197,7 @@ def update(stock_id):
         }})
         if result.matched_count == 0:
             print("PUT request error: no such ID")
+            app.logger.error(f"Error updating stock: no such ID {stock_id}")
             return jsonify({"error" : "Not found"}), 404
     except Exception as e:
         print("Exception: ", str(e))

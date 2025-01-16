@@ -47,9 +47,9 @@ def capital_gains():
     filters = request.args.to_dict()
     stocks1_url = ' http://stocks-service/stocks'
     total_gains_stock1 = 0
-    query_string = '?'
+    query_string = ''
     valid_query = True
-    valid_queries = ['numsharesgt', 'numshareslt']
+    valid_queries = ['numsharesgt', 'numshareslt', 'id']
     if '?' in request.url:
         if not all(key in valid_queries for key in filters.keys()):
             valid_query = False
@@ -66,10 +66,19 @@ def capital_gains():
                 query_string += '&numshareslt=' + lt
             else:
                 valid_query = False
+        # filter by stock id and append to url
+        if 'id' in filters:
+            id = filters['id']
+            # Check if its valid hash
+            if len(id) != 24:
+                valid_query = False
+            else:
+                query_string += '&id=' + id
+            
     if not valid_query:
         return jsonify({'error': f'Invalid query {filters}'}), 400
     
-    response = requests.get(stocks1_url + query_string)
+    response = requests.get(stocks1_url + '?' + query_string)
     if response.status_code == 200:
         stocks = response.json()
         total_gains_stock1 = get_total_gain(stocks, ' http://stocks-service')
