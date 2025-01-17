@@ -99,22 +99,25 @@ def get_stocks():
     # Log that we are getting all stocks
     app.logger.info("Getting all stocks")
     try:
-      filters = request.args.to_dict()
-      filtered_stocks = []
-      for stock in collection.find():
-        match = True
-        # Check if the stock matches the filters from the query string
-        if 'numsharesgt' in filters:
-            match = match and float(stock['shares']) > float(filters['numsharesgt'])
-        if 'numshareslt' in filters:
-            match = match and float(stock['shares']) < float(filters['numshareslt'])
-        # Add a query to check if stock id is in the filters
-        if 'id' in filters:
-            match = match and str(stock['_id']) == filters['id']
-        if match:
-          stock['id'] = str(stock.pop('_id'))
-          filtered_stocks.append(stock)
-      return jsonify(filtered_stocks), 200
+        filters = request.args.to_dict()
+        filtered_stocks = []
+        for stock in collection.find():
+            match = True
+            # Check if the stock matches the filters from the query string
+            if 'numsharesgt' in filters:
+                match = match and float(stock['shares']) > float(filters['numsharesgt'])
+            if 'numshareslt' in filters:
+                match = match and float(stock['shares']) < float(filters['numshareslt'])
+            # Add a query to check if stock id is in the filters
+            if 'id' in filters:
+                match = match and str(stock['_id']) == filters['id']
+            if match:
+                stock['id'] = str(stock.pop('_id'))
+                filtered_stocks.append(stock)
+        # If id was given in filter but we never found it return 404 
+        if 'id' in filters and not filtered_stocks:
+            return jsonify({"error" : "Not found"}), 404
+        return jsonify(filtered_stocks), 200
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
