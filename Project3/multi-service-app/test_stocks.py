@@ -139,7 +139,7 @@ def test_portfolio_value():
     value = requests.get(LOCAL_URL + 'portfolio-value')
     assert value.status_code == 200
     # Assert total value is greater than 200
-    assert value.json()['total value'] > 1000
+    assert value.json()['portfolio value'] > 1000
 
 def test_capital_gains():
     # get capital gains
@@ -149,7 +149,7 @@ def test_capital_gains():
     assert gains.json()['total gains'] > 200
     
 
-# Run test_one
+# Run all tests
 if __name__ == "__main__":
     print("Running tests")
     pytest.main()

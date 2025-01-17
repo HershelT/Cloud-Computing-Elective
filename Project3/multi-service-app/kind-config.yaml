@@ -3,12 +3,12 @@ kind: Cluster
 nodes:
   - role: control-plane
     extraPortMappings:
-      - containerPort: 30082 # NodePort of the stocks service
-        hostPort: 8000
-      - containerPort: 30081 # NodePort of the capital-gains service
-        hostPort: 8080
-      - containerPort: 30017 # NodePort of the database service
-        hostPort: 27017     
+      # - containerPort: 30082 # NodePort of the stocks service
+      #   hostPort: 8000
+      # - containerPort: 30081 # NodePort of the capital-gains service
+      #   hostPort: 8080
+      # - containerPort: 30017 # NodePort of the database service
+      #   hostPort: 27017     
       - containerPort: 31322 # NodePort of the nginx service
         hostPort: 80
     
