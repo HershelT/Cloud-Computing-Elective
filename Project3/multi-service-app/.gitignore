@@ -1,7 +1,5 @@
 stocks/APIKEY.py
 APIKEY.py
-__pycache__/*
 .pytest_cache
-.__pycache__/
 # Ignore the __pycahce__ directory
 __pycache__/
