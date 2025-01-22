@@ -1,0 +1,66 @@
+name: assignment4
+on:
+  workflow_dispatch:
+jobs:
+  # JOB 1: Build the Docker images and save it as artifacts
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    # Upload the stocks and capital gains dockerfiles
+    - name: Build and export the stocks image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: stocks/Dockerfile
+        tags: stocks:latest, ${{ secrets.DOCKER_COURSE_USERNAME }}/stocks:latest
+        outputs: type=docker,dest=/tmp/stocks.tar
+    - name: Build and export the capital gains image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: capital-gains/Dockerfile
+        tags: capital-gains:latest, ${{ secrets.DOCKER_COURSE_USERNAME }}/capital-gains:latest
+        outputs: type=docker,dest=/tmp/capital-gains.tar
+
+    # Upload the stocks and capital gains images
+    - name: Upload stocks image
+      uses: actions/upload-artifact@v4
+      with:
+        name: stocks-image
+        path: /tmp/stocks.tar
+    - name: Upload capital-gains image
+      uses: actions/upload-artifact@v4
+      with:
+        name: capital-gains-image
+        path: /tmp/capital-gains.tar
+# JOB 2:  It uses the stocks and capital gains images 
+# from the first job and a MongoDB image. Docker Compose builds and runs the 
+# finance application based upon these images via the command docker compose up. 
+# Once the application is running the job uses pytest to test the application.  If 
+# successful, it proceeds to the third job
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: download stocks image
+      uses: actions/download-artifact@v4
+      with:
+        name: stocks-image
+        path: /tmp
+    - name: download capital-gains image
+      uses: actions/download-artifact@v4
+      with:
+        name: capital-gains-image
+        path: /tmp
+    - name: Verify downloaded images
+      run: ls -l /tmp
+    - name: Load stocks image
+      run: docker load --input /tmp/stocks.tar
+    - name: Load capital-gains image
+      run: docker load --input /tmp/capital-gains.tar
+    - name: Check images are loaded
+      run: docker image ls
