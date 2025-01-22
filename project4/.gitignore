@@ -1,0 +1,4 @@
+stocks/APIKEY.py
+.pytest_cache
+mongo-data/
+__pycache__/

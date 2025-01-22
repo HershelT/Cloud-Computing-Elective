@@ -1,0 +1,29 @@
+services: 
+  mongodb:
+    image: mongo
+    ports: 
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
+    restart: always
+  stocks:
+    build: ./stocks
+    ports: 
+      - "5001:8000" #Host Port:Container Port
+    expose:
+      - "8000"
+    environment:
+      - COLLECTION_NAME=stocks1
+    depends_on:
+      - mongodb
+    restart: always
+  capital-gains:
+    build: ./capital-gains
+    ports: 
+      - "5003:8080"
+    expose:
+      - "8080"
+    depends_on:
+      - stocks
+volumes:
+  mongo-data:

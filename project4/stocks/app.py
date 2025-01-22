@@ -3,23 +3,25 @@ from pymongo import MongoClient
 import requests
 from bson import ObjectId
 from datetime import datetime
+import subprocess
+
+
 from APIKEY import KEY
 
 import os
 
 app = Flask(__name__)
 
-# Initialize MongoDB client from the local mongo created in docker-compose
+
+# Initialize MongoDB client deployed by docker-compose
 mongo_client = MongoClient('mongodb://mongodb:27017/')
 db = mongo_client['stock_data'] #Use the stock_data database
-collection_name = os.environ.get('COLLECTION_NAME') # Can be 'stocks1' or 'stocks2'
-collection = db[collection_name] #Create or use an existing collection
-
+collection = db["stocks"] #Create or use an existing collection
 
 # POST /stocks
 @app.route('/stocks', methods=['POST'])
 def create_stock():
-    print("Creating a new stock")
+    print(f"Creating a new stock")
     try:
         content_type = request.headers.get('Content-Type')
         if content_type != 'application/json':
@@ -38,7 +40,6 @@ def create_stock():
         name = stock_data.get('name', "NA")
         #Check if purchase date is provided
         purchase_date = stock_data.get('purchase date', "NA")
-        # Check if purchase_date is in correct format (MM-DD-YYYY)
         try:
             datetime.strptime(purchase_date, '%d-%m-%Y')
         except ValueError:
@@ -67,27 +68,34 @@ def create_stock():
 def get_stocks():
     print("Getting all stocks")
     try:
-      filters = request.args.to_dict()
-      filtered_stocks = []
-      for stock in collection.find():
-        match = True
-        # Check if the stock matches the filters from the query string
-        if 'numsharesgt' in filters:
-            match = match and float(stock['shares']) > float(filters['numsharesgt'])
-        if 'numshareslt' in filters:
-            match = match and float(stock['shares']) < float(filters['numshareslt'])
-        if match:
-          stock['id'] = str(stock.pop('_id'))
-          filtered_stocks.append(stock)
-      return jsonify(filtered_stocks), 200
+        filters = request.args.to_dict()
+        filtered_stocks = []
+        for stock in collection.find():
+            match = True
+            # Check if the stock matches the filters from the query string
+            if 'numsharesgt' in filters:
+                match = match and float(stock['shares']) > float(filters['numsharesgt'])
+            if 'numshareslt' in filters:
+                match = match and float(stock['shares']) < float(filters['numshareslt'])
+            # Add a query to check if stock id is in the filters
+            if 'id' in filters:
+                match = match and str(stock['_id']) == filters['id']
+            if match:
+                stock['id'] = str(stock.pop('_id'))
+                filtered_stocks.append(stock)
+        # If id was given in filter but we never found it return 404 
+        if 'id' in filters and not filtered_stocks:
+            return jsonify({"error" : "Not found"}), 404
+        return jsonify(filtered_stocks), 200
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
-#GET /stocks/<id>
+
+# GET /stocks/<id>
 @app.route('/stocks/<stock_id>', methods=['GET'])
 def get_stock(stock_id):
     print("Getting stock with id: ", stock_id)
-    # Check if the stock exists (valid ObjectId)
+    # See if id is a valid ObjectId
     try:
         ObjectId(stock_id)
     except:
@@ -105,11 +113,11 @@ def get_stock(stock_id):
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
 
-#DELETE /stocks/<id>
+# DELETE /stocks/<id>
 @app.route('/stocks/<stock_id>', methods=['DELETE'])
 def delete_stock(stock_id):
     print("Deleting stock with id: ", stock_id)
-    # Check if the stock exists (valid ObjectId)
+    # See if id is a valid ObjectId
     try:
         ObjectId(stock_id)
     except:
@@ -117,17 +125,16 @@ def delete_stock(stock_id):
     try:
         result = collection.delete_one({"_id": ObjectId(stock_id)})
         if result.deleted_count == 0:
-            print("DELETE request error: no such ID")
             return jsonify({"error" : "Not found"}), 404
         return '', 204
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
     
-#PUT /stocks/<id>
+# PUT /stocks/<id>
 @app.route('/stocks/<stock_id>', methods=['PUT'])
 def update(stock_id):
-    # Check if the stock exists (valid ObjectId)
+    # See if id is a valid ObjectId
     try:
         ObjectId(stock_id)
     except:
@@ -145,6 +152,7 @@ def update(stock_id):
         # If 'id' or '_id' is not provided, return error
         if 'id' not in stock_data and '_id' not in stock_data:
             return jsonify({"error:" : "Malformed data"}), 400
+        # Check if stock purchase dat is in MM-DD-YYYY format
         try:
             datetime.strptime(stock_data['purchase date'], '%d-%m-%Y')
         except ValueError:
@@ -171,7 +179,7 @@ def update(stock_id):
 @app.route('/stock-value/<stock_id>', methods=['GET'])
 def get_stock_value(stock_id):
     print("Getting stock value with id: ", stock_id)
-    # Check if the stock exists (valid ObjectId)
+    # See if id is a valid ObjectId
     try:
         ObjectId(stock_id)
     except:
@@ -196,7 +204,6 @@ def get_stock_value(stock_id):
         #Calculate the stock value times how many shares
         stock_value = round(float(current_price * stock['shares']), 2)
         #return a json with the stock value
-    
     except Exception as e:
         print("Exception: ", str(e))
         return jsonify({"server error" : str(e)}), 500
@@ -239,9 +246,14 @@ def get_portfolio_value():
 
 @app.route('/kill', methods=['GET'])
 def kill_container():
-  os._exit(1)
+    os._exit(1)
 
-#Starting the service
+#GET /healthz
+@app.route('/healthz', methods=['GET'])
+def healthz():
+    return 'OK', 200
+
+# Starting the service
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8000))
     print(f"Starting the Stock Portfolio Service on port {port}")
