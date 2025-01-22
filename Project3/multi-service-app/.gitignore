@@ -1,5 +1,5 @@
 stocks/APIKEY.py
 APIKEY.py
 .pytest_cache
-# Ignore the __pycahce__ directory
+mongo-data/
 __pycache__/
