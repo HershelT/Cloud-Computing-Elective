@@ -64,3 +64,38 @@ jobs:
       run: docker load --input /tmp/capital-gains.tar
     - name: Check images are loaded
       run: docker image ls
+    - name: install docker compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+    - name: Run docker compose
+      run: |
+        docker-compose up --build -d
+    - name: Wait for services to start
+      run: |
+        echo "Waiting for services to start"
+        sleep 10
+    - name: check container is running
+      run: docker ps
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set up python
+      uses: actions/setup-python@v4
+    - name: Install dependencies for pip, then instal pytest, and requests
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        pip install requests  
+    - name: check for pytest directory
+      run: |
+        ls -l
+    - name: Run and store tests in assn4_test_results.txt
+      run: |
+        cd tests
+        pytest -v assn4_test.py > assn4_test_results.txt
+    - name: upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: GH_test_results
+        path: tests/assn4_test_results.txt
