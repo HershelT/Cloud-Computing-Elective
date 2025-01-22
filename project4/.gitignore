@@ -1,4 +1,4 @@
 stocks/APIKEY.py
 .pytest_cache
-mongo-data/
+mongo-data
 __pycache__/
