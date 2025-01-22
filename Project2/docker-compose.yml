@@ -59,3 +59,5 @@ services:
       - stocks1-a
       - stocks1-b
       - stocks2
+volumes:
+  mongo-data:

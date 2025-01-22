@@ -3,15 +3,14 @@ from pymongo import MongoClient
 import requests
 from bson import ObjectId
 from datetime import datetime
-
 from APIKEY import KEY
 
 import os
 
 app = Flask(__name__)
 
-# Initialize MongoDB client
-mongo_client = MongoClient('mongodb://mongodb:27017/')  # Assumes 'mongodb' as the service name
+# Initialize MongoDB client from the local mongo created in docker-compose
+mongo_client = MongoClient('mongodb://mongodb:27017/')
 db = mongo_client['stock_data'] #Use the stock_data database
 collection_name = os.environ.get('COLLECTION_NAME') # Can be 'stocks1' or 'stocks2'
 collection = db[collection_name] #Create or use an existing collection
@@ -41,9 +40,9 @@ def create_stock():
         purchase_date = stock_data.get('purchase date', "NA")
         # Check if purchase_date is in correct format (MM-DD-YYYY)
         try:
-            datetime.strptime(purchase_date, '%m-%d-%Y')
+            datetime.strptime(purchase_date, '%d-%m-%Y')
         except ValueError:
-            print("POST request error: purchase date is not in MM-DD-YYYY format")
+            print("POST request error: purchase date is not in DD-MM-YYYY format")
             return jsonify({"error" : "Malformed data"}), 400
         # Create a new stock object
         stock_id = str(ObjectId())
@@ -57,7 +56,7 @@ def create_stock():
         }
         #Add stock to global dictionary
         result = collection.insert_one(stock)
-        response_data = {"id" : str(stock_id)}
+        response_data = {"id" : str(result.inserted_id)}
         return jsonify(response_data), 201
     except Exception as e:
         print("Exception: ", str(e))
@@ -131,6 +130,11 @@ def update(stock_id):
         # If 'id' or '_id' is not provided, return error
         if 'id' not in stock_data and '_id' not in stock_data:
             return jsonify({"error:" : "Malformed data"}), 400
+        try:
+            datetime.strptime(stock_data['purchase date'], '%d-%m-%Y')
+        except ValueError:
+            print("POST request error: purchase date is not in DD-MM-YYYY format")
+            return jsonify({"error" : "Malformed data"}), 400
         #Check if the stock exists
         result = collection.update_one({"_id":ObjectId(stock_id)}, { "$set": {
             "id": str(stock_id),

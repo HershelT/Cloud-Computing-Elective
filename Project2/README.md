@@ -33,7 +33,7 @@ Functions of the NGINX server:
 # Stocks1 and Stocks2
 
 The stocks1 server is running on host port 5001 and the stocks2 server is running on host port 5002.
-Can both be called by running `http://localhost:5001/stocks1` and `http://localhost:5002/stocks2` respectively.
+Can both be called by running `http://localhost:5001/stocks` and `http://localhost:5002/stocks` respectively.
 
 Functions in the stocks1 and stocks2 servers are similar.
 
