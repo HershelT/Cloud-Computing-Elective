@@ -13,7 +13,7 @@ services:
     expose:
       - "8000"
     environment:
-      - COLLECTION_NAME=stocks1
+      - COLLECTION_NAME=stocks
     depends_on:
       - mongodb
     restart: always

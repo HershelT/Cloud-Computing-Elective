@@ -8,6 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-ENV PORT=8000 
+ENV PORT=8080 
 
 CMD ["python", "app.py"]

@@ -36,8 +36,8 @@ tesla_stock = {
 }
 
 # URL of docker container for stocks and capital-gains
-STOCKS_URL = 'http://stocks:8000/'
-CAPITAL_GAINS_URL = 'http://capital-gains:8080/'
+STOCKS_URL = 'http://localhost:5001/'
+CAPITAL_GAINS_URL = 'http://localhost:5003/'
 
 # Post stocks to the stocks service
 def post_stock(stock):

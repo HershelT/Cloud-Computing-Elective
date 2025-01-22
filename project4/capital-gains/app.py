@@ -20,7 +20,7 @@ def get_total_gain(stocks, stock_database_url):
 @app.route('/capital-gains', methods=['GET'])
 def capital_gains():
     filters = request.args.to_dict()
-    stocks_url = ' http://stocks:5001/stocks'
+    stocks_url = 'http://stocks:8000/stocks'
     total_gains_stock1 = 0
     query_string = ''
     valid_query = True
@@ -52,7 +52,7 @@ def capital_gains():
     response = requests.get(stocks_url + '?' + query_string)
     if response.status_code == 200:
         stocks = response.json()
-        total_gains_stock1 = get_total_gain(stocks, ' http://stocks:5001')
+        total_gains_stock1 = get_total_gain(stocks, 'http://stocks:8000')
     return jsonify({'total gains': total_gains_stock1}), 200
 
 if __name__ == '__main__':
