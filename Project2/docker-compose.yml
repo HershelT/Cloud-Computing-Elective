@@ -5,7 +5,7 @@ services:
       - "27017:27017"
     volumes:
       - /data/db
-    # restart: always
+    restart: always
   stocks1-a:
     build: ./stocks
     ports: 
