@@ -4,8 +4,8 @@ services:
     ports: 
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
-    restart: always
+      - /data/db
+    # restart: always
   stocks1-a:
     build: ./stocks
     ports: 
@@ -16,6 +16,8 @@ services:
       - COLLECTION_NAME=stocks1
     depends_on:
       - mongodb
+    volumes:
+      - /app/data
     restart: always
   stocks1-b:
     build: ./stocks
@@ -27,6 +29,8 @@ services:
       - COLLECTION_NAME=stocks1
     depends_on:
       - mongodb
+    volumes:
+      - /app/data
     restart: always
   stocks2:
     build: ./stocks
@@ -38,6 +42,8 @@ services:
       - COLLECTION_NAME=stocks2
     depends_on:
       - mongodb
+    volumes:
+      - /app/data
     restart: always
   capital-gains:
     build: ./capital-gains
@@ -60,5 +66,3 @@ services:
       - stocks1-a
       - stocks1-b
       - stocks2
-volumes:
-  mongo-data:
