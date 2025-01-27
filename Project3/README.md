@@ -3,7 +3,7 @@
 This project demonstrates the deployment of a multi-service application using Kubernetes. The application consists of several microservices, including Stocks, Capital-Gains, MongoDB, and NGINX, orchestrated using Kubernetes.
 
 Based off of Reichman Computer Science University Kubernetes assignment found at:
-`https://github.com/yanivNaor92/cloud-computing-k8s-assignment` 
+[yanivNaor92/cloud-computing](https://github.com/yanivNaor92/cloud-computing-k8s-assignment)
 
 ## Table of Contents
 

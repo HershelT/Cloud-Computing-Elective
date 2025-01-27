@@ -3,6 +3,8 @@
 kind delete cluster --name kind
 # Create a KIND cluster
 kind create cluster --config kind-config.yaml
+# go to the root directory of project
+cd multi-service-app
 # Create a namespace
 kubectl apply -f namespace.yaml
 # Build docker images for capital-gains
