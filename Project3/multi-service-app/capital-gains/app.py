@@ -82,6 +82,9 @@ def capital_gains():
     if response.status_code == 200:
         stocks = response.json()
         total_gains_stock1 = get_total_gain(stocks, ' http://stocks-service')
+    # if response is 404 error
+    elif response.status_code == 404:
+        return jsonify({'error': 'Not found'}), 404
     return jsonify({'total gains': total_gains_stock1}), 200
 
 if __name__ == '__main__':

@@ -72,6 +72,12 @@ def stock_value():
     stock_value = []
     yield stock_value
 
+
+def test_health():
+    # Check if the health check is successful
+    health = requests.get(NGINX_URL + 'healthz')
+    assert health.status_code == 200
+
 def test_post_three(global_id):
     delete_all()
     # Execute three post requests on stock1-3
@@ -173,6 +179,18 @@ def test_capital_gains():
     assert gains.status_code == 200
     # Assert total gains is greater than 200
     assert gains.json()['total gains'] > 200
+
+
+# Cluster kubernetes testing
+
+def test_pod_name():
+    # Get all pod names
+    pods = requests.get(NGINX_URL + 'podName')
+    # Check if the status code is 200
+    assert pods.status_code == 200
+    # Check if stocks in is podNames, podName returns a str, not json
+    assert 'stocks' in pods.text
+
 
 
 # Run all tests
