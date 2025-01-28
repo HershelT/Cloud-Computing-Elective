@@ -40,15 +40,14 @@ Before continuing, ensure you have the following tools installed on your compute
 
 1. **Clone the Repository**:
    ```sh
-   git clone https://github.com/your-repo/multi-service-app
-   cd multi-service-app
-
+   git clone https://github.com/HershelT/Cloud-Computing-Elective/tree/main/Project3
+   ```
 ## Deploying the Application
 
 1. **Deploy everything**:
-   Make sure docker engine is running and execute the following command:
+   Make sure docker engine is running and execute the following command in bash:
    ```sh
-   deploy.sh
+   ./deploy.sh
    ```
    This will run all the deployments necessary, including assigning a namespace, etc.
 
@@ -57,7 +56,7 @@ Before continuing, ensure you have the following tools installed on your compute
 1. **Testing using PyTest**:
    To test the application, run the following command:
    ```sh
-   pytest
+   pytest -v multi-service-app/tests/assn3_tests.py
    ```
 
 ## Cleaning Up
@@ -73,11 +72,14 @@ Before continuing, ensure you have the following tools installed on your compute
 The project directory structure is as follows:
 
 ```
+├── kind-config.yaml
+├── deploy.sh
+├── test_stocks.py
+├── README.md
+├── architecture.png
+|── test-submission.sh
 ├── multi-service-app/
 │   ├── namespace.yaml
-│   ├── kind-config.yaml
-│   ├── deploy.sh
-│   ├── test_stocks.py
 │   ├── stocks/
 │   │   ├── deployment.yaml
 │   │   ├── service.yaml
@@ -97,6 +99,9 @@ The project directory structure is as follows:
 │   │   ├── deployment.yaml
 │   │   ├── service.yaml
 │   │   ├── configmap.yaml
+│   ├── tests/
+│   │   ├── assn3_tests.py
+│   │   ├── stocks_list.py
 
 ```
 
@@ -105,6 +110,8 @@ The project directory structure is as follows:
 1. **Accessing All Services Through NGINX**:
 
    To access the Stocks service, open a web browser and navigate to `http://127.0.0.1:80/`.
+
+   Check out the nginx/configmap.yaml file to see how the NGINX server is configured to route incoming requests to the appropriate backend services. (example: /stocks, /capital-gains, etc.)
 
 
 ## License
