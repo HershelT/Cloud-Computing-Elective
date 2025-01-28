@@ -2,3 +2,4 @@ multi-service-app/stocks/APIKEY.py
 APIKEY.py
 .pytest_cache
 multi-service-app/*/__pycache__/
+*.zip
