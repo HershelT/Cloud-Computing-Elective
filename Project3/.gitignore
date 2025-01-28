@@ -2,4 +2,4 @@ multi-service-app/stocks/APIKEY.py
 APIKEY.py
 .pytest_cache
 mongo-data/
-multi-service-app/__pycache__/
+multi-service-app/*/__pycache__/
