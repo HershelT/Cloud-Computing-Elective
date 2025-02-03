@@ -4,6 +4,7 @@ import requests
 from bson import ObjectId
 from datetime import datetime
 import subprocess
+import re
 
 
 # Added for kubernetics
@@ -313,19 +314,21 @@ def get_portfolio_value():
 #     # Delete the pod
 #     os.system(f'kubectl delete pod {response} -n multi-service-app')
 #     return f'Killing the container{response}', 200
-
 @app.route('/kill', methods=['GET'])
 def kill_container():
     try:
         # Find the id of mongo-deployment pod
         response = subprocess.check_output(
-            "kubectl get pods -n multi-service-app | grep mongo-deployment", shell=True
+            "kubectl get pods -n multi-service-app", shell=True
         ).decode('utf-8').strip()
-        response = response.split(' ')[0]
+        match = re.search(r'(mongo-deployment-[a-z0-9-]+)', response)
+        if not match:
+            return 'Error: No pod found matching mongo-deployment', 404
+        pod_name = match.group(1)
         # Delete the pod
-        subprocess.check_call(f'kubectl delete pod {response} -n multi-service-app', shell=True)
+        subprocess.check_call(f'kubectl delete pod {pod_name} -n multi-service-app', shell=True)
         
-        return f'Killing the container {response}', 200
+        return f'Killing the container {pod_name}', 200
     except subprocess.CalledProcessError as e:
         return f'Error: {str(e)}', 500
 

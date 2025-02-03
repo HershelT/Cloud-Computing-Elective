@@ -1,0 +1,8 @@
+stocks:numsharesgt=10
+stocks:numshareslt=10
+capital-gains:numsharesgt=10
+capital-gains:numshareslt=10
+stocks:id=3245
+capital-gains:id=3245
+stocks:numsharesgt=11&numshareslt=20
+capital-gains:numsharesgt=11&numshareslt=20

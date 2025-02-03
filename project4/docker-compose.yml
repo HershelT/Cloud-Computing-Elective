@@ -1,29 +1,30 @@
 services: 
   mongodb:
-    image: mongo
+    image: mongo:latest
     ports: 
       - "27017:27017"
     volumes:
-      - ./mongo-data:/data/db
+      - /data/db
     restart: always
   stocks:
-    build: ./stocks
+    image: stocks:latest
     ports: 
       - "5001:8000" #Host Port:Container Port
     expose:
       - "8000"
     environment:
       - COLLECTION_NAME=stocks
+      - API_KEY=${API_KEY}
     depends_on:
       - mongodb
+    volumes:
+      - /app/data
     restart: always
   capital-gains:
-    build: ./capital-gains
+    image: capital-gains:latest
     ports: 
       - "5003:8080"
     expose:
       - "8080"
     depends_on:
       - stocks
-volumes:
-  mongo-data:

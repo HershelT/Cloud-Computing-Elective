@@ -8,24 +8,37 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Get Date, and add it to logs/log.txt file
+      run: echo $(date -Iminutes) >> logs/log.txt
+    - name: Add name of sumbitter to logs/log.txt file
+      run: echo 'Hershel Thomas' >> logs/log.txt
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     # Upload the stocks and capital gains dockerfiles
     - name: Build and export the stocks image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: stocks
         file: stocks/Dockerfile
         tags: stocks:latest, ${{ secrets.DOCKER_COURSE_USERNAME }}/stocks:latest
         outputs: type=docker,dest=/tmp/stocks.tar
     - name: Build and export the capital gains image
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: capital-gains
         file: capital-gains/Dockerfile
         tags: capital-gains:latest, ${{ secrets.DOCKER_COURSE_USERNAME }}/capital-gains:latest
         outputs: type=docker,dest=/tmp/capital-gains.tar
-
+    - name: Check if images are built and saved, add to logs/log.txt. Store logs-tmp or GH_logs in env
+      if: always()
+      run: |
+        if [ -f /tmp/stocks.tar ] && [ -f /tmp/capital-gains.tar ]; then
+          echo "image successfully built" >> logs/log.txt
+          echo "LOGNAME=logs-tmp" >> $GITHUB_ENV
+        else
+          echo "image not able to be built" >> logs/log.txt
+          echo "LOGNAME=GH_logs" >> $GITHUB_ENV
+        fi
     # Upload the stocks and capital gains images
     - name: Upload stocks image
       uses: actions/upload-artifact@v4
@@ -37,6 +50,12 @@ jobs:
       with:
         name: capital-gains-image
         path: /tmp/capital-gains.tar
+    - name: Upload log.txt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.LOGNAME }} #Sets final name of logs/log.txt artifact if this job fails
+        path: logs/log.txt
 # JOB 2:  It uses the stocks and capital gains images 
 # from the first job and a MongoDB image. Docker Compose builds and runs the 
 # finance application based upon these images via the command docker compose up. 
@@ -46,6 +65,15 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: download and load the logs/log.txt file to the logs/log.txt directory in the runner
+      uses: actions/download-artifact@v4
+      with:
+        name: logs-tmp    
+        path: logs
+    - name: verify logs/log.txt file is downloaded
+      run: ls -l logs
     - name: download stocks image
       uses: actions/download-artifact@v4
       with:
@@ -68,17 +96,32 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y docker-compose
+    - name: List everything in the root directory
+      run: ls -l 
     - name: Run docker compose
       run: |
-        docker-compose up --build -d
+        docker-compose up -d
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
     - name: Wait for services to start
       run: |
         echo "Waiting for services to start"
         sleep 10
+    - name: check container is up
+      run: docker ps | grep -c "Up"
+    - name: check if both containers are succesfully started, add to logs/log.txt
+    # Check by seeing if the containers mongo, stocks, and capital-gains are up (it says Up in the STATUS column)
+    # Check to see if Up is in status collumn three times
+      run: |
+        if [ $(docker ps | grep -c "Up") -eq 3 ]; then
+          echo "Container up and running" >> logs/log.txt
+        else
+          echo "Container failed to run" >> logs/log.txt
+          # tell step that it failed
+          exit 1
+        fi
     - name: check container is running
       run: docker ps
-    - name: Checkout
-      uses: actions/checkout@v4
     - name: Set up python
       uses: actions/setup-python@v4
     - name: Install dependencies for pip, then instal pytest, and requests
@@ -92,10 +135,87 @@ jobs:
     - name: Run and store tests in assn4_test_results.txt
       run: |
         cd tests
-        pytest -v assn4_test.py > assn4_test_results.txt
+        pytest -v assn4_tests.py > assn4_test_results.txt
+    - name: log if tests are successful (only if container is up and running)
+      run: |
+        if [ $(cat tests/assn4_test_results.txt | grep -c "failed") -eq 0 ]; then
+          echo "tests succeeded" >> logs/log.txt
+        else
+          echo "tests failed" >> logs/log.txt
+        fi
     - name: upload test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: GH_test_results
         path: tests/assn4_test_results.txt
+    - name: upload logs/log.txt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: GH_logs
+        path: logs/log.txt
+  # JOB 3: The third job is called the query job.  Like the second job, it runs the application 
+  # using docker compose up.  This time, instead of issuing tests using pytest, it will 
+  # read instructions from a file to issue specific requests with query strings to the 
+  # application and it records the results of these tests in a file. 
+  query:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    # run application using docker compose like job 2 (tests)
+    - name: download stocks image
+      uses: actions/download-artifact@v4
+      with:
+        name: stocks-image
+        path: /tmp
+    - name: download capital-gains image
+      uses: actions/download-artifact@v4
+      with:
+        name: capital-gains-image
+        path: /tmp
+    - name: Verify downloaded images
+      run: ls -l /tmp
+    - name: Load stocks image
+      run: docker load --input /tmp/stocks.tar
+    - name: Load capital-gains image
+      run: docker load --input /tmp/capital-gains.tar
+    - name: Check images are loaded
+      run: docker image ls
+    - name: install docker compose
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+    - name: List everything in the root directory
+      run: ls -l 
+    - name: Run docker compose
+      run: |
+        docker-compose up -d
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
+    - name: Wait for services to start
+      run: |
+        echo "Waiting for services to start"
+        sleep 10
+    - name: check container is running
+      run: docker ps
+    - name: Set up python
+      uses: actions/setup-python@v4
+    - name: Install dependencies for pip, then requests
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests  
+    - name: go into query directory and run the query_reader.py file
+      run: |
+        cd query
+        python query_reader.py
+    - name: upload query results from response.txt
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: GH_query_results
+        path: query/response.txt
+    
+      

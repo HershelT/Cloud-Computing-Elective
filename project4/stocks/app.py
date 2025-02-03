@@ -3,12 +3,10 @@ from pymongo import MongoClient
 import requests
 from bson import ObjectId
 from datetime import datetime
-import subprocess
-
-
-from APIKEY import KEY
-
 import os
+# Fetch the api key from github secrets 
+# IF Running locally, change the API_KEY to your own API key in the docker-compose file
+KEY = os.getenv('API_KEY')
 
 app = Flask(__name__)
 
