@@ -1,4 +1,4 @@
-## MOST RECENT (or Important Project) HERE
+## MOST RECENT (or Important) Project HERE
 # Multi-Service Application (Project 3)
 
 This project demonstrates the deployment of a multi-service application using Kubernetes. The application consists of several microservices, including Stocks, Capital-Gains, MongoDB, and NGINX, orchestrated using Kubernetes.
