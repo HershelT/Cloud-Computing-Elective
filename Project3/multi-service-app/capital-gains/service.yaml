@@ -6,9 +6,9 @@ metadata:
 spec:
   selector:
     app: capital-gains
-  type: NodePort 
+  type: ClusterIP 
   ports:
     - protocol: TCP
       port: 80
       targetPort: 8080
-      nodePort: 30081
+      # nodePort: 30081

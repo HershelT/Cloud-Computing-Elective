@@ -254,8 +254,15 @@ def get_stock_value(stock_id):
         if not response.status_code == requests.codes.ok:
             print("GET request error: ", response.status_code)
             return jsonify({"server error" : "API response code " + str(response.status_code)}), 500
-        #Get the current stock price from response
-        current_price = response.json()['price']
+        # Try to get price (if invalid symbol, then return 500)
+        try:
+            data = response.json()
+            if not isinstance(data, dict) or 'price' not in data:
+                raise ValueError("Unexpected data structure returned from API")
+            current_price = data['price']
+        except Exception as e:
+            print("GET request error: ", str(e))
+            return jsonify({"server error" : str(e)}), 500
         #Calculate the stock value times how many shares
         stock_value = round(float(current_price * stock['shares']), 2)
         #return a json with the stock value
